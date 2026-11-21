@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Dad's Voice Studio – Sum Shredders</title>
+<link href="https://fonts.googleapis.com/css2?family=Bungee&family=Nunito:wght@700;800;900&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#1b1f3b;--yel:#ffd23f;--pink:#ff4f8b;--teal:#19c3b1;--orange:#ff8a3d;--cream:#fffdf5;--red:#e63946;--green:#22c55e}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:linear-gradient(160deg,#3a0ca3,#14112e);min-height:100%;font-family:'Nunito',system-ui,sans-serif;color:var(--ink)}
+.h{font-family:'Bungee',Impact,sans-serif;font-weight:400;letter-spacing:.02em}
+.wrap{max-width:760px;margin:0 auto;padding:16px 14px 60px}
+header{display:flex;align-items:center;gap:12px;color:#fff;margin-bottom:12px}
+header .mic{font-size:44px}
+header h1{margin:0;font-size:clamp(22px,5vw,32px);line-height:1}
+header p{margin:4px 0 0;font-weight:800;opacity:.85}
+.panel{background:var(--cream);border:5px solid var(--ink);border-radius:24px;box-shadow:0 8px 0 rgba(0,0,0,.45);padding:16px;margin-bottom:16px}
+.btn{font-family:'Bungee',Impact,sans-serif;font-size:17px;border:4px solid var(--ink);border-radius:16px;padding:10px 16px;background:var(--yel);color:var(--ink);box-shadow:0 5px 0 var(--ink);cursor:pointer;transition:transform .08s,box-shadow .08s;line-height:1.1}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 var(--ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn.white{background:#fff}.btn.pink{background:var(--pink);color:#fff}.btn.teal{background:var(--teal)}.btn.sm{font-size:13px;padding:6px 10px;border-width:3px;box-shadow:0 3px 0 var(--ink)}
+.progress{display:flex;align-items:center;gap:10px;font-weight:900}
+.bar{flex:1;height:18px;border:3px solid var(--ink);border-radius:999px;background:#fff;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--teal);width:0;transition:width .3s}
+.tips{font-weight:700;font-size:14px;color:#4a4f73;margin:10px 0 0;padding-left:18px}
+.tips li{margin:2px 0}
+#setup{text-align:center}
+.card .grp{display:inline-block;background:var(--ink);color:#fff;border-radius:999px;padding:3px 12px;font-weight:900;font-size:13px}
+.card .count{float:right;font-weight:900;color:#6b6f92}
+.say{font-family:'Bungee',Impact,sans-serif;font-size:clamp(34px,9vw,60px);text-align:center;margin:18px 0 4px;line-height:1.1;word-break:break-word}
+.tip{text-align:center;font-weight:800;color:#6b6f92;min-height:22px}
+.status{text-align:center;font-weight:900;margin-top:8px;min-height:22px}
+.status.ok{color:#0b9e6b}.status.rec{color:var(--red)}
+.meter{height:12px;border:3px solid var(--ink);border-radius:999px;overflow:hidden;background:#fff;margin:12px auto 0;max-width:420px}
+.meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--green),var(--yel) 70%,var(--red));transition:width .05s}
+.recRow{display:flex;justify-content:center;align-items:center;gap:14px;margin-top:16px;flex-wrap:wrap}
+.recBtn{width:110px;height:110px;border-radius:50%;border:6px solid var(--ink);background:var(--red);box-shadow:0 7px 0 var(--ink);cursor:pointer;color:#fff;font-family:'Bungee';font-size:18px;position:relative}
+.recBtn:active{transform:translateY(4px);box-shadow:0 3px 0 var(--ink)}
+.recBtn.on{animation:pulse 1s infinite;background:#b5172a}
+@keyframes pulse{50%{box-shadow:0 7px 0 var(--ink),0 0 0 14px rgba(230,57,70,.25)}}
+.navRow{display:flex;justify-content:space-between;gap:8px;margin-top:16px;flex-wrap:wrap}
+.keys{text-align:center;font-size:12.5px;font-weight:800;color:#9a9db8;margin-top:10px}
+.group{margin-top:14px}
+.group h3{margin:0 0 6px;font-size:15px;font-weight:900;text-transform:uppercase;letter-spacing:.04em;color:#4a4f73;display:flex;justify-content:space-between}
+.list{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px}
+.chip{display:flex;align-items:center;gap:6px;border:3px solid var(--ink);border-radius:12px;padding:5px 8px;background:#fff;cursor:pointer;font-weight:800;font-size:14px;min-height:40px}
+.chip.done{background:#d9f8e6}
+.chip.cur{outline:4px solid var(--pink);outline-offset:1px}
+.chip .t{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.chip .pl{border:none;background:none;font-size:16px;cursor:pointer;padding:0 2px}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+input[type=text],input[type=number]{font-family:'Nunito';font-weight:900;font-size:18px;padding:9px 12px;border:4px solid var(--ink);border-radius:14px;min-width:0;flex:1}
+.small{font-size:13px;font-weight:800;color:#6b6f92}
+.err{background:#ffe1e1;border:3px solid var(--red);border-radius:14px;padding:10px;font-weight:800;margin-top:10px;display:none}
+.hide{display:none!important}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><div class="mic">🎙️</div><div><h1 class="h">Dad's Voice Studio</h1><p>Record your voice for Sum Shredders</p></div></header>
+
+  <div class="panel">
+    <div class="progress"><span id="progTxt">0 / 0 recorded</span><div class="bar"><i id="progBar"></i></div></div>
+    <ul class="tips">
+      <li>Find a quiet room and hold the phone or laptop about a hand-span from your mouth.</li>
+      <li>Tap <b>Record</b>, wait a beat, say the line, then tap <b>Stop</b>. Pauses at the start and end get trimmed for you.</li>
+      <li>Big energy! The game is for kids, so lean into "SICK!" and "Wipeout!".</li>
+      <li>Recordings save on this device as you go, so you can stop and come back any time.</li>
+    </ul>
+  </div>
+
+  <div class="panel" id="setup">
+    <p style="font-weight:800;margin-top:0">The studio needs your microphone.</p>
+    <button class="btn pink" id="btnMic">🎤 Turn on microphone</button>
+    <div class="err" id="micErr"></div>
+  </div>
+
+  <div class="panel card hide" id="card">
+    <span class="grp" id="cGroup"></span><span class="count" id="cCount"></span>
+    <div class="say" id="cSay"></div>
+    <div class="tip" id="cTip"></div>
+    <div class="meter"><i id="meter"></i></div>
+    <div class="recRow">
+      <button class="btn white" id="btnPlay" title="Play (P)">▶ Play</button>
+      <button class="recBtn" id="btnRec" title="Record / Stop (Space)">REC</button>
+      <button class="btn teal" id="btnNext" title="Keep and next (Enter)">✓ Next</button>
+    </div>
+    <div class="status" id="cStatus"></div>
+    <div class="navRow">
+      <button class="btn white sm" id="btnPrev">← Back</button>
+      <button class="btn white sm" id="btnNextMissing">Next unrecorded ⏭</button>
+    </div>
+    <div class="keys">Keyboard: Space = record/stop · P = play · Enter = next · ← → = move</div>
+  </div>
+
+  <div class="panel hide" id="names">
+    <h3 class="h" style="margin:0 0 6px;font-size:18px">👦 Names</h3>
+    <div class="small" style="margin-bottom:8px">Record each player's name so the game says "Hi Sonny! Suit up!". Type the name <b>exactly</b> as it is in the game's player profile.</div>
+    <div class="row"><input type="text" id="nameIn" maxlength="12" placeholder="e.g. Sonny"><button class="btn sm" id="btnAddName">+ Add name</button></div>
+  </div>
+
+  <div class="panel hide" id="test">
+    <h3 class="h" style="margin:0 0 6px;font-size:18px">🔊 Try it out</h3>
+    <div class="small" style="margin-bottom:8px">Hear your clips stitched together the way the game will play them.</div>
+    <div class="row">
+      <button class="btn white sm" id="btnTestQ">🎲 Random question</button>
+      <button class="btn white sm" id="btnTestWrong">😬 Wrong answer</button>
+      <button class="btn white sm" id="btnTestWin">🏆 Park complete</button>
+    </div>
+    <div class="row" style="margin-top:8px"><input type="number" id="numIn" min="0" max="999" placeholder="Any number 0–999"><button class="btn white sm" id="btnTestNum">Say it</button></div>
+    <div class="status" id="testOut"></div>
+  </div>
+
+  <div class="panel hide" id="all">
+    <h3 class="h" style="margin:0;font-size:18px">📋 All clips</h3>
+    <div id="groups"></div>
+  </div>
+
+  <div class="panel hide" id="export">
+    <h3 class="h" style="margin:0 0 6px;font-size:18px">📦 Send to Claude</h3>
+    <div class="small" style="margin-bottom:10px">When you're done (or want to try a batch), download the zip and attach it in your chat with Claude. Claude cleans up the clips and adds them to the beta.</div>
+    <div class="row"><button class="btn pink" id="btnZip">⬇️ Download voice pack (.zip)</button><button class="btn white sm" id="btnClear">Delete all recordings</button></div>
+    <div class="status" id="zipOut"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+(()=>{
+'use strict';
+const $=s=>document.querySelector(s);
+const PARKS=['Sunny Meadow','Forest Trails','Desert Canyon','Snow Mountain','Night City','Water Park','Japan','Moon Base'];
+const NUMW=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
+const TENW={20:'twenty',30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety'};
+const C=[];
+const add=(group,id,say,tip)=>C.push({group,id,say,tip:tip||''});
+// fun lines first so the game feels like Dad quickly
+add('Praise','p_awesome','Awesome!','Excited!');
+add('Praise','p_nailedit','Nailed it!','Proud and pumped');
+add('Praise','p_yes','Yes!','Short and punchy');
+add('Praise','p_correct','Correct!','Happy');
+add('Praise','p_greatjob','Great job!','Warm and proud');
+add('Praise','p_boom','Boom!','Big!');
+add('Oops','o_oops','Oops!','Friendly, not disappointed');
+add('Oops','o_notquite','Not quite!','Encouraging');
+add('Oops','o_sonear','Ooh, so close!','Encouraging');
+add('Hype','c_nice','Nice!','After 2 in a row');
+add('Hype','c_sick','Sick!','Skate-park cool');
+add('Hype','c_radical','Radical!','Even bigger');
+add('Hype','c_unstoppable','Unstoppable!','Huge');
+add('Hype','c_legendary','Legendary!','Absolutely massive');
+PARKS.forEach((p,i)=>add('Parks','park'+i,p+'!','Announcer voice'));
+[['e_letsride',"Let's ride!",'Said straight after the park name'],['e_lowgravity','Low gravity!','Floaty, spacey'],['e_go','Go!','Countdown, after you hear 3, 2, 1'],
+ ['e_wipeout','Wipeout!','Funny crash'],['e_bawkwipeout','Bawk! Wipeout!','Chicken crash, do your best chicken'],['e_parkcomplete','Park complete!','Celebrating'],
+ ['e_yougot','You got…','Lead-in to the stars'],['e_1star','one star!',''],['e_2stars','two stars!',''],['e_3stars','three stars!','Extra excited'],
+ ['e_champion','Champion! You finished every park!','The very end. Make it epic'],['e_bonuspark','Bonus park unlocked!','Surprise!'],
+ ['e_chicken','Bawk bawk! You unlocked the secret chicken!','Silly'],['e_hi','Hi…','Lead-in to a name'],['e_suitup','Suit up!','Before picking a ride'],['e_voiceon','Voice on!','When read-aloud is switched on']]
+ .forEach(([id,s,t])=>add('Game events',id,s,t));
+[['q_whatis','What is…','Start of a question. Keep the voice up, like more is coming'],['w_plus','plus',''],['w_takeaway','take away',''],['w_times','times',''],['w_dividedby','divided by',''],
+ ['w_is','is','As in "3 plus 4 IS 7"'],['q_whatnumber','What number…','As in "What number plus 3 makes 8?"'],['w_makes','makes',''],
+ ['q_halfof','What is half of…','A question'],['w_halfof','Half of…','A statement: "Half of 12 is 6"'],['w_thentimes','then times','As in "3 plus 4, then times 5"'],
+ ['w_hundred','hundred','As in "two HUNDRED"'],['w_and','and','As in "one hundred AND five"']]
+ .forEach(([id,s,t])=>add('Maths words',id,s,t));
+for(let n=0;n<20;n++)add('Numbers','n'+n,NUMW[n],'Clear and even. Same tone for every number');
+for(const t of[20,30,40,50,60,70,80,90])add('Numbers','n'+t,TENW[t],'Clear and even');
+
+/* ---------- names ---------- */
+const slug=n=>'name_'+n.toLowerCase().replace(/[^a-z0-9]/g,'');
+let NAMES=[];try{NAMES=JSON.parse(localStorage.getItem('ssStudioNames')||'[]');}catch(e){}
+function addNameClips(){NAMES.forEach(n=>{if(!C.find(c=>c.id===slug(n)))C.push({group:'Names',id:slug(n),say:n+'!',tip:'Said after "Hi…"',name:n});});}
+addNameClips();
+
+/* ---------- storage (IndexedDB) ---------- */
+let db;
+const idb=()=>new Promise((res,rej)=>{const r=indexedDB.open('ssStudio',1);r.onupgradeneeded=()=>r.result.createObjectStore('clips');r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error);});
+const tx=(mode,fn)=>new Promise((res,rej)=>{const t=db.transaction('clips',mode),s=t.objectStore('clips');const r=fn(s);t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error);});
+const putClip=(id,v)=>db?tx('readwrite',s=>s.put(v,id)):Promise.resolve();
+const delAll=()=>db?tx('readwrite',s=>s.clear()):Promise.resolve();
+async function getAll(){const out={};await new Promise((res,rej)=>{const t=db.transaction('clips'),s=t.objectStore('clips'),r=s.openCursor();r.onsuccess=()=>{const c=r.result;if(c){out[c.key]=c.value;c.continue();}else res();};r.onerror=()=>rej(r.error);});return out;}
+let REC={};
+
+/* ---------- audio ---------- */
+let actx,stream,recorder,chunks=[],analyser,recOn=false,recT0=0,autoStop;
+const decoded={};
+function ctx(){if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();}if(actx.state==='suspended')actx.resume();return actx;}
+const pickMime=()=>{const c=['audio/webm;codecs=opus','audio/mp4','audio/webm','audio/ogg;codecs=opus'];for(const m of c){try{if(window.MediaRecorder&&MediaRecorder.isTypeSupported(m))return m;}catch(e){}}return '';};
+const extFor=t=>/mp4|aac|m4a/.test(t)?'m4a':/ogg/.test(t)?'ogg':'webm';
+async function decode(id){const r=REC[id];if(!r)return null;if(decoded[id]&&decoded[id].ts===r.ts)return decoded[id].buf;
+ const ab=await r.blob.arrayBuffer();const buf=await new Promise((res,rej)=>ctx().decodeAudioData(ab,res,rej));const tb=trim(buf);decoded[id]={ts:r.ts,buf:tb};return tb;}
+function trim(buf){const d=buf.getChannelData(0),sr=buf.sampleRate;let peak=0;for(let i=0;i<d.length;i++)peak=Math.max(peak,Math.abs(d[i]));const th=Math.max(.012,peak*.06);
+ let s=0,e=d.length-1;while(s<d.length&&Math.abs(d[s])<th)s++;while(e>s&&Math.abs(d[e])<th)e--;s=Math.max(0,s-Math.floor(sr*.03));e=Math.min(d.length-1,e+Math.floor(sr*.06));
+ const len=Math.max(1,e-s),out=ctx().createBuffer(1,len,sr),o=out.getChannelData(0),g=peak>0?Math.min(4,.85/peak):1;for(let i=0;i<len;i++)o[i]=d[s+i]*g;return out;}
+let playing=[];
+function stopPlay(){playing.forEach(s=>{try{s.stop();}catch(e){}});playing=[];}
+async function playIds(ids){stopPlay();const bufs=[];for(const id of ids){const b=await decode(id);if(!b)return false;bufs.push(b);}
+ let t=ctx().currentTime+.03;for(const b of bufs){const s=ctx().createBufferSource();s.buffer=b;s.connect(ctx().destination);s.start(t);playing.push(s);t+=b.duration+.04;}return true;}
+
+$('#btnMic').onclick=async()=>{
+ const err=$('#micErr');err.style.display='none';
+ if(!navigator.mediaDevices||!window.MediaRecorder){err.textContent='This browser can\'t record audio. Try Chrome, Edge or Safari on a phone or laptop.';err.style.display='block';return;}
+ try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:true,autoGainControl:false,channelCount:1}});}
+ catch(e){err.textContent='Microphone was blocked. Allow microphone access for this site in your browser settings, then tap the button again.';err.style.display='block';return;}
+ const src=ctx().createMediaStreamSource(stream);analyser=ctx().createAnalyser();analyser.fftSize=512;src.connect(analyser);meterLoop();
+ $('#setup').classList.add('hide');['#card','#names','#test','#all','#export'].forEach(s=>$(s).classList.remove('hide'));render();
+};
+function meterLoop(){const a=new Uint8Array(analyser.fftSize);(function f(){analyser.getByteTimeDomainData(a);let m=0;for(const v of a)m=Math.max(m,Math.abs(v-128));$('#meter').style.width=Math.min(100,m/128*160)+'%';requestAnimationFrame(f);})();}
+
+function startRec(){if(recOn||!stream)return;stopPlay();const mime=pickMime();chunks=[];
+ try{recorder=new MediaRecorder(stream,mime?{mimeType:mime}:undefined);}catch(e){recorder=new MediaRecorder(stream);}
+ recorder.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data);};
+ recorder.onstop=async()=>{const type=recorder.mimeType||mime||'audio/webm';const blob=new Blob(chunks,{type});const id=C[cur].id;
+  if(blob.size<800){status('That was too short. Try again.','');return;}
+  const v={blob,type,ts:Date.now()};REC[id]=v;await putClip(id,v);render();status('✓ Saved! Listen back, then tap Next.','ok');playIds([id]);};
+ recorder.start();recOn=true;recT0=performance.now();$('#btnRec').classList.add('on');$('#btnRec').textContent='STOP';tick();autoStop=setTimeout(stopRec,8000);}
+function stopRec(){if(!recOn)return;recOn=false;clearTimeout(autoStop);$('#btnRec').classList.remove('on');$('#btnRec').textContent='REC';try{recorder.stop();}catch(e){}}
+function tick(){if(!recOn)return;status('● Recording… '+((performance.now()-recT0)/1000).toFixed(1)+'s','rec');requestAnimationFrame(tick);}
+function status(t,c){const s=$('#cStatus');s.textContent=t;s.className='status '+(c||'');}
+
+/* ---------- UI ---------- */
+let cur=0;
+function render(){
+ const done=C.filter(c=>REC[c.id]).length;$('#progTxt').textContent=`${done} / ${C.length} recorded`;$('#progBar').style.width=(done/C.length*100)+'%';
+ const c=C[cur];const ingrp=C.filter(x=>x.group===c.group);
+ $('#cGroup').textContent=c.group;$('#cCount').textContent=`${ingrp.indexOf(c)+1} of ${ingrp.length}`;$('#cSay').textContent=c.say;$('#cTip').textContent=c.tip?'💡 '+c.tip:'';
+ $('#btnPlay').disabled=!REC[c.id];
+ const groups=[...new Set(C.map(x=>x.group))];
+ $('#groups').innerHTML=groups.map(g=>{const items=C.map((x,i)=>({x,i})).filter(o=>o.x.group===g);const d=items.filter(o=>REC[o.x.id]).length;
+  return `<div class="group"><h3><span>${g}</span><span>${d}/${items.length}</span></h3><div class="list">${items.map(o=>`<div class="chip ${REC[o.x.id]?'done':''} ${o.i===cur?'cur':''}" data-i="${o.i}"><span>${REC[o.x.id]?'✅':'⚪'}</span><span class="t">${esc(o.x.say)}</span>${REC[o.x.id]?`<button class="pl" data-play="${o.x.id}" aria-label="Play">▶</button>`:''}</div>`).join('')}</div></div>`;}).join('');
+}
+const esc=t=>String(t).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function go(i){stopRec();cur=(i+C.length)%C.length;status(REC[C[cur].id]?'✓ Already recorded. Record again to replace it.':'', REC[C[cur].id]?'ok':'');render();}
+$('#btnRec').onclick=()=>{ctx();recOn?stopRec():startRec();};
+$('#btnPlay').onclick=()=>playIds([C[cur].id]);
+$('#btnNext').onclick=()=>go(cur+1);
+$('#btnPrev').onclick=()=>go(cur-1);
+$('#btnNextMissing').onclick=()=>{for(let k=1;k<=C.length;k++){const j=(cur+k)%C.length;if(!REC[C[j].id]){go(j);return;}}status('🎉 Everything is recorded!','ok');};
+$('#groups').addEventListener('click',e=>{const p=e.target.closest('[data-play]');if(p){e.stopPropagation();playIds([p.dataset.play]);return;}const c=e.target.closest('[data-i]');if(c){go(+c.dataset.i);window.scrollTo({top:$('#card').offsetTop-10,behavior:'smooth'});}});
+document.addEventListener('keydown',e=>{if(e.target.matches('input'))return;if($('#card').classList.contains('hide'))return;
+ if(e.code==='Space'){e.preventDefault();$('#btnRec').click();}else if(e.key==='Enter'){e.preventDefault();go(cur+1);}else if(e.key==='ArrowRight')go(cur+1);else if(e.key==='ArrowLeft')go(cur-1);else if(e.key==='p'||e.key==='P')playIds([C[cur].id]);});
+$('#btnAddName').onclick=()=>{const n=$('#nameIn').value.trim().slice(0,12);if(!n||!/[a-z0-9]/i.test(n))return;if(!NAMES.some(x=>slug(x)===slug(n))){NAMES.push(n);try{localStorage.setItem('ssStudioNames',JSON.stringify(NAMES));}catch(e){}addNameClips();}
+ $('#nameIn').value='';go(C.findIndex(c=>c.id===slug(n)));window.scrollTo({top:$('#card').offsetTop-10,behavior:'smooth'});};
+
+/* ---------- test sentences (same rules as the game) ---------- */
+function N(n){if(n<20)return['n'+n];if(n<100){const t=Math.floor(n/10)*10,r=n%10;return r?['n'+t,'n'+r]:['n'+t];}const h=Math.floor(n/100),r=n%100;return r?['n'+h,'w_hundred','w_and',...N(r)]:['n'+h,'w_hundred'];}
+async function tryPlay(ids,label){const missing=ids.filter(i=>!REC[i]);const out=$('#testOut');
+ if(missing.length){out.className='status';out.textContent='Still need: '+[...new Set(missing)].map(i=>(C.find(c=>c.id===i)||{say:i}).say).join(', ');return;}
+ out.className='status ok';out.textContent='▶ '+label;await playIds(ids);}
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+$('#btnTestQ').onclick=()=>{const ops=[['w_plus','+'],['w_takeaway','−'],['w_times','×']];const [w,s]=ops[ri(0,2)];const a=ri(2,12),b=ri(1,s==='−'?a:10);tryPlay(['q_whatis',...N(a),w,...N(b)],`What is ${a} ${s} ${b}?`);};
+$('#btnTestWrong').onclick=()=>{const a=ri(2,9),b=ri(2,9);tryPlay(['o_oops',...N(a),'w_plus',...N(b),'w_is',...N(a+b)],`Oops! ${a} + ${b} is ${a+b}`);};
+$('#btnTestWin').onclick=()=>tryPlay(['e_parkcomplete','e_yougot','e_3stars'],'Park complete! You got three stars!');
+$('#btnTestNum').onclick=()=>{const n=Math.round(+$('#numIn').value);if(!(n>=0&&n<=999))return;tryPlay(N(n),String(n));};
+
+/* ---------- export ---------- */
+$('#btnZip').onclick=async()=>{const out=$('#zipOut');const ids=C.filter(c=>REC[c.id]).map(c=>c.id);if(!ids.length){out.textContent='Record something first!';return;}
+ if(!window.JSZip){out.textContent='Zip tool didn\'t load. Check your internet and refresh.';return;}
+ out.className='status';out.textContent='Packing…';const z=new JSZip();const man={app:'sum-shredders',made:new Date().toISOString(),names:NAMES,clips:[]};
+ for(const id of ids){const r=REC[id],f=id+'.'+extFor(r.type);z.file(f,r.blob);man.clips.push({id,file:f,say:C.find(c=>c.id===id).say});}
+ z.file('manifest.json',JSON.stringify(man,null,1));
+ const blob=await z.generateAsync({type:'blob'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`sum-shredders-voice-${new Date().toISOString().slice(0,10)}.zip`;document.body.appendChild(a);a.click();a.remove();
+ out.className='status ok';out.textContent=`✓ Downloaded ${ids.length} clips. Now attach the zip in your chat with Claude.`;};
+let clearArm=false;
+$('#btnClear').onclick=async()=>{if(!clearArm){clearArm=true;$('#btnClear').textContent='Tap again to delete everything';setTimeout(()=>{clearArm=false;$('#btnClear').textContent='Delete all recordings';},4000);return;}
+ await delAll();REC={};clearArm=false;$('#btnClear').textContent='Delete all recordings';render();$('#zipOut').textContent='All recordings deleted.';};
+
+(async()=>{try{db=await idb();REC=await getAll();}catch(e){$('#micErr').textContent='This browser blocked storage (private mode?). Recordings won\'t be kept if you leave the page.';$('#micErr').style.display='block';db=null;}
+ const first=C.findIndex(c=>!REC[c.id]);cur=first<0?0:first;
+})();
+})();
+</script>
+</body>
+</html>

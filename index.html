@@ -72,6 +72,9 @@ button{font-family:inherit;color:inherit}
 .col{display:grid;grid-template-columns:1fr;gap:8px}
 .col .card{display:flex;align-items:center;gap:12px;text-align:left;padding:8px 12px}
 .col .card .em{font-size:32px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.row2 .card{display:flex;align-items:center;gap:10px;text-align:left;padding:8px 12px}
+.row2 .card .em{font-size:32px}
 .sw{display:flex;flex-wrap:wrap;gap:10px}
 .swatch{width:44px;height:44px;border-radius:50%;border:4px solid var(--ink);cursor:pointer;box-shadow:0 3px 0 var(--ink);position:relative}
 .swatch.sel{outline:4px solid var(--pink);outline-offset:3px}
@@ -247,6 +250,7 @@ button{font-family:inherit;color:inherit}
     <div class="step"><h3>3. Helmet colour</h3><div class="sw" id="helmetRow"></div></div>
     <div class="step"><h3>4. Ride colour</h3><div class="sw" id="paintRow"></div><div class="note">🔒 Finish parks to unlock more colours and secret riders!</div></div>
     <div class="step"><h3>5. Maths level</h3><div class="col" id="diffRow"></div></div>
+    <div class="step"><h3>6. Narrator</h3><div class="row2" id="narrRow"></div></div>
     <button class="btn big pink" id="btnToMap">LET'S RIDE →</button>
   </div>
 </section>
@@ -374,7 +378,7 @@ const NQ=8;
 const NP=PARKS.length;
 const SKEY=IS_BETA?'sumShredders_beta_v2':'sumShredders_v2',OLDKEY='sumShredders_v1';
 const blankProg=()=>({stars:Array(NP).fill(0),best:Array(NP).fill(0)});
-const newProfile=name=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e5),name,sel:{vehicle:'bike',rider:'max',helmet:0,paint:0,diff:'rookie'},prog:{rookie:blankProg(),pro:blankProg(),legend:blankProg()},cleared:Array(NP).fill(0),chicken:false});
+const newProfile=name=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e5),name,sel:{vehicle:'bike',rider:'max',helmet:0,paint:0,diff:'rookie',narrator:'dad'},prog:{rookie:blankProg(),pro:blankProg(),legend:blankProg()},cleared:Array(NP).fill(0),chicken:false});
 function fixProfile(p){
  const d=newProfile(String(p.name||'Rider').slice(0,12));d.id=p.id||d.id;
  d.sel=Object.assign(d.sel,p.sel||{});d.chicken=!!p.chicken;
@@ -452,6 +456,7 @@ function audioInit(){
   AU.master=ctx.createGain();AU.master.gain.value=.9;AU.master.connect(ctx.destination);
   AU.music=ctx.createGain();AU.music.gain.value=SET.music?.2:0;AU.music.connect(AU.master);
   AU.sfx=ctx.createGain();AU.sfx.gain.value=SET.sfx?.6:0;AU.sfx.connect(AU.master);
+  AU.voice=ctx.createGain();AU.voice.gain.value=1;AU.voice.connect(AU.master);
   const nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate),d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;AU.noise=nb;
   startMusic();
  }catch(e){AU.ctx=null;}
@@ -498,8 +503,45 @@ function sfx(name,arg){
 const canSpeak='speechSynthesis' in window;let voice=null;
 function pickVoice(){if(!canSpeak)return;const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en[-_]AU/i.test(v.lang))||vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}
 if(canSpeak){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
-function say(text){if(!SET.voice||!canSpeak)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-AU';u.rate=.95;u.pitch=1.1;speechSynthesis.speak(u);}catch(e){}}
-function hush(){if(canSpeak)try{speechSynthesis.cancel();}catch(e){}}
+function say(text){stopSeq();if(!SET.voice||!canSpeak)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-AU';u.rate=.95;u.pitch=1.1;speechSynthesis.speak(u);}catch(e){}}
+function hush(){stopSeq();if(canSpeak)try{speechSynthesis.cancel();}catch(e){}}
+
+/* ================= DAD'S VOICE (recorded clips in /voice) ================= */
+const VO={has:new Set(),buf:{},ready:false,cur:[],ver:'',pre:false};
+let seqTok=0;
+try{fetch('voice/index.json',{cache:'no-cache'}).then(r=>r.ok?r.json():null).then(j=>{if(j&&Array.isArray(j.clips)){j.clips.forEach(c=>VO.has.add(c));VO.ver=j.v||'';VO.ready=VO.has.size>0;preloadVoice();if(G.mode==='setup')renderSetup();}}).catch(()=>{});}catch(e){}
+const narr=()=>(S.sel.narrator==='robot'||!VO.ready)?'robot':'dad';
+const nameClip=n=>'name_'+String(n).toLowerCase().replace(/[^a-z0-9]/g,'');
+function numV(n){if(!(n>=0&&n<1000&&Number.isInteger(n)))return null;if(n<20)return['n'+n];if(n<100){const t=Math.floor(n/10)*10,r=n%10;return r?['n'+t,'n'+r]:['n'+t];}const h=Math.floor(n/100),r=n%100;return r?['n'+h,'w_hundred','w_and',...numV(r)]:['n'+h,'w_hundred'];}
+const OPW={'+':'w_plus','−':'w_takeaway','×':'w_times','÷':'w_dividedby'};
+function exprV(str){const out=[];let paren=false;for(const tk of str.trim().split(/\s+/)){
+  if(tk.startsWith('(')){paren=true;const v=numV(+tk.slice(1));if(!v)return null;out.push(...v);continue;}
+  if(tk.endsWith(')')){const v=numV(+tk.slice(0,-1));if(!v)return null;out.push(...v);continue;}
+  if(OPW[tk]){out.push(OPW[tk]);continue;}
+  const v=numV(+tk);if(!v)return null;out.push(...v);}return out;}
+function qVoice(q){const t=q.text.replace('= ?','').trim();
+ if(/^Half of/.test(t)){const v=numV(+t.replace('Half of',''));return v?['q_halfof',...v]:null;}
+ if(t.startsWith('?')){const m=t.match(/^\? (\S) (\d+) = (\d+)$/);if(!m)return null;const b=numV(+m[2]),c=numV(+m[3]);return b&&c?['q_whatnumber',OPW[m[1]],...b,'w_makes',...c]:null;}
+ const e=exprVP(t);return e?['q_whatis',...e]:null;}
+function exprVP(t){const m=t.match(/^\((\d+) ([+−×÷]) (\d+)\) × (\d+)$/);if(m){const a=numV(+m[1]),b=numV(+m[3]),c=numV(+m[4]);return a&&b&&c?[...a,OPW[m[2]],...b,'w_thentimes',...c]:null;}return exprV(t);}
+function eqVoice(q){const[l,r]=q.eq.split(' = ');const ans=numV(+r);if(!ans)return null;
+ if(/^Half of/.test(l)){const v=numV(+l.replace('Half of',''));return v?['w_halfof',...v,'w_is',...ans]:null;}
+ const e=exprVP(l);return e?[...e,q.text.startsWith('?')?'w_makes':'w_is',...ans]:null;}
+async function loadClip(id){if(VO.buf[id])return VO.buf[id];if(!AU.ctx)throw 0;const r=await fetch(`voice/${id}.mp3${VO.ver?'?v='+VO.ver:''}`);if(!r.ok)throw 0;const ab=await r.arrayBuffer();
+ const b=await new Promise((res,rej)=>AU.ctx.decodeAudioData(ab,res,rej));VO.buf[id]=b;return b;}
+function preloadVoice(){if(!VO.ready||!AU.ctx||VO.pre)return;VO.pre=true;[...VO.has].forEach(id=>loadClip(id).catch(()=>{}));}
+function stopSeq(){seqTok++;VO.cur.forEach(s=>{try{s.stop();}catch(e){}});VO.cur=[];duck(false);}
+function duck(on){if(AU.ctx&&AU.music)try{AU.music.gain.setTargetAtTime(SET.music?(on?.06:.2):0,AU.ctx.currentTime,.08);}catch(e){}}
+async function playSeq(ids,fallback){audioInit();if(!AU.ctx){say(fallback);return;}stopSeq();if(canSpeak)try{speechSynthesis.cancel();}catch(e){}
+ const tok=++seqTok;let bufs;try{bufs=await Promise.all(ids.map(loadClip));}catch(e){if(tok===seqTok&&fallback)say(fallback);return;}
+ if(tok!==seqTok)return;let t=AU.ctx.currentTime+.03;duck(true);
+ for(const b of bufs){const s=AU.ctx.createBufferSource();s.buffer=b;s.connect(AU.voice);s.start(t);VO.cur.push(s);t+=b.duration+.035;}
+ const ms=(t-AU.ctx.currentTime)*1000+120;setTimeout(()=>{if(tok===seqTok){VO.cur=[];duck(false);}},ms);}
+/* speak: Dad's clips when all are recorded, otherwise the robot voice */
+function speak(ids,text){if(!SET.voice)return;if(narr()==='dad'&&ids&&ids.length&&ids.every(id=>VO.has.has(id))){playSeq(ids,text);return;}if(text)say(text);}
+/* dadOnly: extra Dad lines the robot never says (countdown, hype) */
+function dadOnly(ids){if(!SET.voice||narr()!=='dad'||!ids.every(id=>VO.has.has(id)))return;playSeq(ids,null);}
+window.__voice={VO,qVoice,eqVoice,numV,get GEN(){return GEN;}};
 
 /* ================= THREE SETUP ================= */
 const canvas=$('#c');
@@ -1006,13 +1048,14 @@ function renderSetup(){
   <div class="av" style="--skin:${r.skin};--shirt:${r.shirt};--helm:${S.sel.rider===r.id?curHelmet():r.shirt}"><i class="shirt"></i><i class="face"></i><i class="helm"></i></div><div class="nm">${r.name}</div>${lk?`<span class="lk">🔒 ${r.unlock>5?'???':r.unlock+' parks'}</span>`:''}</div>`;}).join('');
  const sw=(arr,key)=>arr.map((h,i)=>{const lk=!itemUnlocked(h);return `<div class="swatch ${S.sel[key]===i?'sel':''} ${lk?'locked':''}" data-${key}="${i}" style="background:${h.c}" title="${lk?(PARKS[h.u].bonus?'Keep riding to unlock…':'Finish '+PARKS[h.u].name+' to unlock'):''}"></div>`;}).join('');
  $('#helmetRow').innerHTML=sw(HELMETS,'helmet');$('#paintRow').innerHTML=sw(PAINTS,'paint');
+ $('#narrRow').innerHTML=[['dad','👨','Dad',VO.ready?'Dad\'s real voice!':'No recordings yet'],['robot','🤖','Robot','Computer voice']].map(([k,em,nm,ds])=>`<div class="card ${narr()===k?'sel':''} ${k==='dad'&&!VO.ready?'locked':''}" data-narr="${k}"><div class="em">${em}</div><div><div class="nm">${nm}</div><div class="ds">${ds}</div></div></div>`).join('');
  $('#diffRow').innerHTML=Object.entries(DIFFS).map(([k,d])=>`<div class="card ${S.sel.diff===k?'sel':''}" data-diff="${k}"><div class="em">${d.em}</div><div><div class="nm">${d.name}</div><div class="ds">${d.ds}</div></div></div>`).join('');
 }
 $('#sSetup').addEventListener('click',e=>{
- const t=e.target.closest('[data-veh],[data-rider],[data-helmet],[data-paint],[data-diff],[data-mystery]');if(!t)return;
+ const t=e.target.closest('[data-veh],[data-rider],[data-helmet],[data-paint],[data-diff],[data-mystery],[data-narr]');if(!t)return;
  if(t.classList.contains('locked')){sfx('wrong');if(t.dataset.mystery)shout('🤫 Find the secret code!','trick');return;}
  sfx('click');const ds=t.dataset;
- if(ds.veh)S.sel.vehicle=ds.veh;if(ds.rider)S.sel.rider=ds.rider;if(ds.helmet!=null)S.sel.helmet=+ds.helmet;if(ds.paint!=null)S.sel.paint=+ds.paint;if(ds.diff)S.sel.diff=ds.diff;
+ if(ds.veh)S.sel.vehicle=ds.veh;if(ds.rider)S.sel.rider=ds.rider;if(ds.helmet!=null)S.sel.helmet=+ds.helmet;if(ds.paint!=null)S.sel.paint=+ds.paint;if(ds.diff)S.sel.diff=ds.diff;if(ds.narr){S.sel.narrator=ds.narr;save();renderSetup();if(ds.narr==='dad')speak(VO.has.has(nameClip(S.name))?['e_hi',nameClip(S.name),'e_suitup']:['e_suitup'],'Suit up!');else say(`Hi ${S.name}! Suit up!`);return;}
  save();renderSetup();if(!ds.diff)respawnPreview();
 });
 
@@ -1027,7 +1070,7 @@ function unlockChicken(){secretBuf='';
  if(S.chicken){if(S.sel.vehicle!=='chicken'){S.sel.vehicle='chicken';save();renderSetup();respawnPreview();}sfx('cluck');shout('🐔 BAWK!');return;}
  S.chicken=true;S.sel.vehicle='chicken';save();renderSetup();respawnPreview();
  confetti();sfx('bawk');sfx('unlock');shout('🐔 SECRET RIDE!');setTimeout(()=>shout('CHICKEN UNLOCKED!','trick'),600);
- say('Bawk bawk! You unlocked the secret chicken!');
+ speak(['e_chicken'],'Bawk bawk! You unlocked the secret chicken!');
 }
 
 /* ---------- players ---------- */
@@ -1045,7 +1088,7 @@ $('#playerList').addEventListener('click',e=>{
  const nw=e.target.closest('[data-new]');if(nw){sfx('click');openName(null);return;}
  const c=e.target.closest('[data-pid]');if(c){sfx('click');selectProfile(c.dataset.pid);}
 });
-function selectProfile(id){const p=DB.profiles.find(x=>x.id===id);if(!p)return;S=p;DB.cur=id;save();respawnPreview();setMode('setup');say(`Hi ${p.name}! Suit up!`);}
+function selectProfile(id){const p=DB.profiles.find(x=>x.id===id);if(!p)return;S=p;DB.cur=id;save();respawnPreview();setMode('setup');speak(VO.has.has(nameClip(p.name))?['e_hi',nameClip(p.name),'e_suitup']:['e_suitup'],`Hi ${p.name}! Suit up!`);}
 let editPid=null,delArm=false;
 function openName(pid){editPid=pid;delArm=false;const p=pid&&DB.profiles.find(x=>x.id===pid);
  $('#nameTitle').textContent=p?'Edit rider':'New rider';$('#nameInput').value=p?p.name:'';$('#nameErr').textContent='';
@@ -1089,8 +1132,8 @@ function startLevel(i){
  updateRider(0);updateCamera(.016);
  const cnt=$('#countText');show('#sCount',1);
  const steps=['3','2','1','GO!'];
- steps.forEach((s,k)=>later(()=>{cnt.textContent=s;cnt.style.animation='none';void cnt.offsetWidth;cnt.style.animation='';sfx('beep',s==='GO!');},k*700));
- later(()=>{show('#sCount',0);say(PARKS[i].space?'Moon Base! Low gravity!':`${PARKS[i].name}! Let's ride!`);if(PARKS[i].space)shout('LOW GRAVITY!');
+ steps.forEach((s,k)=>later(()=>{cnt.textContent=s;cnt.style.animation='none';void cnt.offsetWidth;cnt.style.animation='';sfx('beep',s==='GO!');dadOnly([s==='GO!'?'e_go':'n'+s]);},k*700));
+ later(()=>{show('#sCount',0);speak(['park'+i,PARKS[i].space?'e_lowgravity':'e_letsride'],PARKS[i].space?'Moon Base! Low gravity!':`${PARKS[i].name}! Let's ride!`);if(PARKS[i].space)shout('LOW GRAVITY!');
   const z0=R.z,z1=approachZ(0);runSeq([{dur:2.2,start:()=>sfx('roll'),update:u=>{R.z=lerp(z0,z1,easeIO(u));}}],askQuestion);},4*700);
 }
 function renderHud(){
@@ -1119,25 +1162,26 @@ function askQuestion(){
  $('#btnSay').classList.toggle('hide',!SET.voice||!canSpeak);
  $('#qPanel').classList.remove('hidden');renderHud();
  G.accept=true;applyView();
- say(q.speak);
+ speak(qVoice(q),q.speak);
 }
 $('#answers').addEventListener('click',e=>{const b=e.target.closest('.ans');if(b)answer(+b.dataset.i);});
-$('#btnSay').addEventListener('click',()=>{if(G.cur)say(G.cur.speak);});
+$('#btnSay').addEventListener('click',()=>{if(G.cur)speak(qVoice(G.cur),G.cur.speak);});
 function answer(i){
  if(!G.accept||G.paused||!G.cur)return;const q=G.cur;if(i>=q.choices.length)return;
  G.accept=false;const btns=[...document.querySelectorAll('.ans')];btns.forEach(b=>b.disabled=true);
  const correct=q.choices[i]===q.answer;
  if(correct){
   btns[i].classList.add('right');G.streak++;const pts=Math.round(100*mult());G.score+=pts;
-  sfx('right',G.streak);$('#qMsg').textContent=pick(['Awesome!','Nailed it!','Yes!','Correct!','Too easy!','Boom!']);$('#qMsg').className='qMsg good';
-  say(pick(['Awesome!','Nailed it!','Yes!','Correct!','Great job!']));
+  const pr_=pick([['Awesome!','p_awesome'],['Nailed it!','p_nailedit'],['Yes!','p_yes'],['Correct!','p_correct'],['Great job!','p_greatjob'],['Boom!','p_boom']]);
+  sfx('right',G.streak);$('#qMsg').textContent=pr_[0];$('#qMsg').className='qMsg good';
+  speak([pr_[1]],pr_[0]);
   shout('+'+pts,'pts');renderHud();
   later(()=>{$('#qPanel').classList.add('hidden');doJump();},650);
  }else{
   btns[i].classList.add('wrong');const ri_=q.choices.indexOf(q.answer);if(ri_>=0)btns[ri_].classList.add('reveal');
   G.lives--;G.wrong++;G.streak=0;sfx('wrong');
   $('#qMsg').textContent=`Oops! ${q.eq}`;
-  say(`Oops! ${q.sayEq}.`);
+  {const ev=eqVoice(q);speak(ev?[pick(['o_oops','o_notquite','o_sonear']),...ev]:null,`Oops! ${q.sayEq}.`);}
   renderHud();const hs=document.querySelectorAll('#hudHearts span');if(hs[G.lives]){hs[G.lives].classList.add('shake');}
   if(G.lives<=0){later(()=>{$('#qPanel').classList.add('hidden');doCrash();},1600);}
   else{later(doWrong,700);}
@@ -1155,7 +1199,7 @@ function doJump(){
   {dur:air,start:()=>{camAir(true);sfx('whoosh');if(R.type==='chicken')sfx('cluck');R.eggDone=false;R.fns=tr[1];R.tu=0;shout(tr[0],'trick');},
    update:u=>{R.z=lerp(zLip,zLand,u);R.y=o.h+4*A*u*(1-u);R.airPitch=Math.atan(4*A*(1-2*u)/o.gap)*.7;R.tu=u;},
    end:()=>{R.y=null;R.airPitch=null;R.fns=null;R.land=1;sfx('land');camAir(false);
-    if(G.streak>=2){const S_=['','','NICE!','SICK!','RADICAL!','UNSTOPPABLE!','LEGENDARY!'];shout(S_[Math.min(G.streak,6)]);}
+    if(G.streak>=2){const S_=['','','NICE!','SICK!','RADICAL!','UNSTOPPABLE!','LEGENDARY!'];shout(S_[Math.min(G.streak,6)]);dadOnly(['c_'+S_[Math.min(G.streak,6)].toLowerCase().replace('!','')]);}
     G.q++;renderHud();if(fin){cam.mode='finish';}}},
   {dur:fin?2.4:1.3,update:u=>{R.z=lerp(zLand,zNext,easeOut(u));if(fin)R.cheer=clamp(u*2,0,1);}}
  ],()=>{if(fin)levelComplete();else askQuestion();});
@@ -1172,7 +1216,7 @@ function doCrash(){
  const k=G.q,o=OBS[k],zA=R.z;
  runSeq([
   {dur:1.0,start:()=>sfx('roll'),update:u=>{R.z=lerp(zA,o.zc,Math.pow(u,1.7));}},
-  {dur:.01,end:()=>{startCrash();cam.mode='crash';sfx('crash');if(R.type==='chicken'){sfx('bawk');shout('BAWK!');say('Bawk! Wipeout!');}else{shout('OUCH!');say('Wipeout!');}}},
+  {dur:.01,end:()=>{startCrash();cam.mode='crash';sfx('crash');if(R.type==='chicken'){sfx('bawk');shout('BAWK!');speak(['e_bawkwipeout'],'Bawk! Wipeout!');}else{shout('OUCH!');speak(['e_wipeout'],'Wipeout!');}}},
   {dur:1.5},
   {dur:1.6,start:addDizzy}
  ],()=>{
@@ -1199,12 +1243,12 @@ function levelComplete(){
   $('#btnWinNext').style.display=last?'none':'';
   show('#sWin',1);$('#btnPause').classList.add('hide');
   if(unl.length)sfx('unlock');
-  say(last?`Champion! You finished every park with ${stars} stars!`:`Park complete! You got ${stars} star${stars>1?'s':''}!`);
+  speak(last?['e_champion']:['e_parkcomplete','e_yougot',`e_${stars}star${stars>1?'s':''}`,...(unl.some(u=>u.includes('BONUS PARK'))?['e_bonuspark']:[])],last?`Champion! You finished every park with ${stars} stars!`:`Park complete! You got ${stars} star${stars>1?'s':''}!`);
  },1200);
 }
 
 /* ---------- buttons ---------- */
-function firstGesture(){audioInit();if(canSpeak&&!firstGesture.done){firstGesture.done=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}}
+function firstGesture(){audioInit();preloadVoice();if(canSpeak&&!firstGesture.done){firstGesture.done=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}}
 document.addEventListener('pointerdown',firstGesture);
 $('#btnPlay').onclick=()=>{sfx('click');setMode('players');};
 $('#btnToMap').onclick=()=>{sfx('click');setMode('map');};
@@ -1224,7 +1268,7 @@ function toMap(){resetMenuWorld();setMode('map');}
 function setToggle(id,key){const b=$(id);b.classList.toggle('off',!SET[key]);}
 function refreshToggles(){setToggle('#tgMusic','music');setToggle('#tgVoice','voice');setToggle('#tgSfx','sfx');$('#btnSay').classList.toggle('hide',!SET.voice||!canSpeak);}
 $('#tgMusic').onclick=()=>{SET.music=!SET.music;save();refreshToggles();audioInit();if(AU.music)AU.music.gain.value=SET.music?.2:0;};
-$('#tgVoice').onclick=()=>{SET.voice=!SET.voice;save();refreshToggles();if(!SET.voice)hush();else if(G.mode==='play'&&G.accept&&G.cur)say(G.cur.speak);else say('Voice on!');};
+$('#tgVoice').onclick=()=>{SET.voice=!SET.voice;save();refreshToggles();if(!SET.voice)hush();else if(G.mode==='play'&&G.accept&&G.cur)say(G.cur.speak);else speak(['e_voiceon'],'Voice on!');};
 $('#tgSfx').onclick=()=>{SET.sfx=!SET.sfx;save();refreshToggles();audioInit();if(AU.sfx)AU.sfx.gain.value=SET.sfx?.6:0;sfx('click');};
 if(!canSpeak){$('#tgVoice').style.display='none';}
 refreshToggles();
