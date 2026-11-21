@@ -193,11 +193,9 @@ button{font-family:inherit;color:inherit}
 #selfie.c-br{right:14px;bottom:14px}#selfie.c-bl{left:14px;bottom:14px}#selfie.c-tr{right:14px;top:120px}#selfie.c-tl{left:14px;top:120px}
 #selfie.hide{display:none}
 @media (max-width:640px){#selfie{width:110px}#selfie.c-tr,#selfie.c-tl{top:150px}}
-.credit{position:absolute;left:18px;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none}
-.credit span{font-family:'Baloo 2','Nunito',sans-serif;font-weight:800;font-size:17px;line-height:1;color:#fff3e0;-webkit-text-stroke:4px #0b2a5b;paint-order:stroke fill;letter-spacing:.02em}
-.credit img{height:clamp(96px,18vh,170px);width:auto;filter:drop-shadow(0 5px 0 rgba(27,31,59,.55))}
-@media (max-height:520px){.credit img{height:84px}}
-@media (max-width:640px) and (orientation:portrait){.credit{left:50%;transform:translateX(-50%)}.credit img{height:110px}}
+#copyright{position:fixed;left:10px;bottom:8px;z-index:12;display:flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;color:#fff3e0;background:rgba(11,42,91,.72);padding:4px 10px 4px 5px;border-radius:999px;pointer-events:none;letter-spacing:.02em}
+#copyright img{width:18px;height:18px;border-radius:5px}
+#copyright.hide{display:none}
 #err{display:none;position:fixed;inset:0;z-index:99;background:var(--cream);align-items:center;justify-content:center;text-align:center;padding:30px;font-weight:900;font-size:20px}
 
 @media (max-width:640px){
@@ -239,7 +237,6 @@ button{font-family:inherit;color:inherit}
   <div class="logo"><div class="l1 h">SUM</div><div class="l2 h">SHREDDERS</div><div class="sub">Maths Bike Park</div><div class="betaTag">BETA</div></div>
   <button class="btn big pink bob" id="btnPlay">PLAY ▶</button>
   <div class="hint">Answer maths questions to land massive jumps! 🚲 🛹 🛴</div>
-  <div class="credit"><span>A game by</span><img src="brand/captain-dad-logo.png" alt="Captain Dad Games" onerror="this.parentNode.style.display='none'"></div>
 </section>
 
 <section id="sPlayers" class="screen center">
@@ -336,6 +333,7 @@ button{font-family:inherit;color:inherit}
 </section>
 
 <div id="selfie" class="hide"><video id="selfieVid" playsinline muted autoplay></video><span class="live">● LIVE</span></div>
+<div id="copyright"><img src="brand/favicon-32.png" alt="" onerror="this.remove()"><span>© <span id="cyear">2026</span> Captain Dad Games</span></div>
 <div id="confetti"></div>
 <div id="err">Sorry! This game needs a browser with 3D graphics (WebGL) switched on.</div>
 
@@ -1138,7 +1136,7 @@ function clearTimers(){timers.forEach(clearTimeout);timers=[];seq=null;}
 const G={mode:'title',park:0,diff:'rookie',q:0,lives:3,wrong:0,score:0,streak:0,best:0,accept:false,cur:null,used:new Set(),paused:false};
 function show(id,on){$(id).classList.toggle('show',!!on);}
 function setMode(m){
- G.mode=m;
+ G.mode=m;$('#copyright').classList.toggle('hide',m==='play');
  ['#sTitle','#sPlayers','#sName','#sSetup','#sMap','#sHud','#sPause','#sWin','#sCrash','#sCount'].forEach(s=>show(s,false));
  $('#btnPause').classList.toggle('hide',m!=='play');$('#tgCam').classList.toggle('hide',m!=='play');if(m==='play'){$('#tgCam').classList.toggle('off',!S.sel.cam);if(S.sel.cam)camOn();}else camOff();
  if(m==='title'){show('#sTitle',1);cam.mode='orbit';}
@@ -1387,6 +1385,7 @@ $('#tgVoice').onclick=()=>{SET.voice=!SET.voice;save();refreshToggles();if(!SET.
 $('#tgSfx').onclick=()=>{SET.sfx=!SET.sfx;save();refreshToggles();audioInit();if(AU.sfx)AU.sfx.gain.value=SET.sfx?.6:0;sfx('click');};
 if(!canSpeak){$('#tgVoice').style.display='none';}
 refreshToggles();
+try{$('#cyear').textContent=new Date().getFullYear();}catch(e){}
 document.addEventListener('keydown',e=>{
  if(e.target&&e.target.matches&&e.target.matches('input'))return;
  if(G.mode==='setup'&&e.key&&e.key.length===1&&!$('#sName').classList.contains('show')){secretKey(e.key.toLowerCase());return;}
