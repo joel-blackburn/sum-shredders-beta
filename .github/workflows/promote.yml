@@ -30,6 +30,8 @@ jobs:
       - name: Copy beta into production and switch to the prod channel
         run: |
           cp beta/index.html prod/index.html
+          # Dad's voice clips travel with the game (studio.html and tools/ stay beta-only)
+          if [ -d beta/voice ]; then rm -rf prod/voice && cp -r beta/voice prod/voice; fi
           sed -i "s/const CHANNEL='beta';/const CHANNEL='prod';/" prod/index.html
           sed -i 's/<title>Sum Shredders BETA – /<title>Sum Shredders – /' prod/index.html
           # Safety check: stop if the switch didn't happen
@@ -41,6 +43,7 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add index.html
+          if [ -d voice ]; then git add -A voice; fi
           if git diff --cached --quiet; then echo "Production already matches beta. Nothing to do."; exit 0; fi
           git commit -m "Promote beta (${GITHUB_SHA::7}) to production"
           git push
