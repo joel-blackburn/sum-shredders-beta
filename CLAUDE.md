@@ -17,5 +17,5 @@ and is only ever updated by the **Promote beta to production** GitHub Action. Ne
 - The promote workflow copies `voice/` to production along with `index.html` (not studio.html or tools/).
 
 ## Brand
-- Studio brand: **Captain Dad** (Captain Dad Games). Its design system artifact is https://claude.ai/artifact/S5LNCW8krvLEGFgpvRU4aW (logos, icon, colours: navy #071b37, cream #fff3d7, gold #ffc928, red #e92f36).
+- Studio brand: **Captain Dad** (Captain Dad Games). Its design system artifact is https://claude.ai/artifact/S5LNCW8krvLEGFgpvRU4aW (logos, icon, palette: navy #0b2a5b, sky #33c3ff, gold #ffc90a, red #ff4d4d, cream #fff3e0; type: Baloo 2 ExtraBold for headings, Nunito for body, both Google Fonts). Use these for Captain Dad branding text; the game keeps Bungee for its own UI.
 - Web-optimised copies live in `brand/` (favicon, apple-touch icon, manifest icons, title-screen logo, wide lockups). The promote workflow copies `brand/` to production.
