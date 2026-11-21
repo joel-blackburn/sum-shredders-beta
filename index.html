@@ -4,6 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <meta name="theme-color" content="#1b1f3b">
+<link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
+<link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
+<link rel="manifest" href="brand/site.webmanifest">
+<meta name="author" content="Captain Dad Games">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Sum Shredders BETA – Maths Bike Park</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -189,6 +193,11 @@ button{font-family:inherit;color:inherit}
 #selfie.c-br{right:14px;bottom:14px}#selfie.c-bl{left:14px;bottom:14px}#selfie.c-tr{right:14px;top:120px}#selfie.c-tl{left:14px;top:120px}
 #selfie.hide{display:none}
 @media (max-width:640px){#selfie{width:110px}#selfie.c-tr,#selfie.c-tl{top:150px}}
+.credit{position:absolute;left:18px;bottom:14px;display:flex;flex-direction:column;align-items:center;gap:2px;pointer-events:none}
+.credit span{font-size:13px;color:#fff;-webkit-text-stroke:3px var(--ink);paint-order:stroke fill;letter-spacing:.06em}
+.credit img{height:clamp(96px,18vh,170px);width:auto;filter:drop-shadow(0 5px 0 rgba(27,31,59,.55))}
+@media (max-height:520px){.credit img{height:84px}}
+@media (max-width:640px) and (orientation:portrait){.credit{left:50%;transform:translateX(-50%)}.credit img{height:110px}}
 #err{display:none;position:fixed;inset:0;z-index:99;background:var(--cream);align-items:center;justify-content:center;text-align:center;padding:30px;font-weight:900;font-size:20px}
 
 @media (max-width:640px){
@@ -230,6 +239,7 @@ button{font-family:inherit;color:inherit}
   <div class="logo"><div class="l1 h">SUM</div><div class="l2 h">SHREDDERS</div><div class="sub">Maths Bike Park</div><div class="betaTag">BETA</div></div>
   <button class="btn big pink bob" id="btnPlay">PLAY ▶</button>
   <div class="hint">Answer maths questions to land massive jumps! 🚲 🛹 🛴</div>
+  <div class="credit"><span class="h">A game by</span><img src="brand/captain-dad-logo.png" alt="Captain Dad Games" onerror="this.parentNode.style.display='none'"></div>
 </section>
 
 <section id="sPlayers" class="screen center">

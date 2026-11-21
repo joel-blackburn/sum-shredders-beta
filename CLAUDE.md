@@ -15,3 +15,7 @@ and is only ever updated by the **Promote beta to production** GitHub Action. Ne
 - The game loads `voice/index.json`. With narrator "Dad", it stitches clips (numbers, maths words, phrases) and falls
   back to the computer voice for any line with a missing clip. Clip IDs are defined in `studio.html`.
 - The promote workflow copies `voice/` to production along with `index.html` (not studio.html or tools/).
+
+## Brand
+- Studio brand: **Captain Dad** (Captain Dad Games). Its design system artifact is https://claude.ai/artifact/S5LNCW8krvLEGFgpvRU4aW (logos, icon, colours: navy #071b37, cream #fff3d7, gold #ffc928, red #e92f36).
+- Web-optimised copies live in `brand/` (favicon, apple-touch icon, manifest icons, title-screen logo, wide lockups). The promote workflow copies `brand/` to production.
