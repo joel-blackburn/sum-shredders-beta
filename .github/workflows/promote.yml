@@ -1,0 +1,47 @@
+name: Promote beta to production
+
+# Run manually: GitHub > this repo > Actions > "Promote beta to production" > Run workflow
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: "Type PROMOTE to release the current beta to sumshredders.com"
+        required: true
+
+jobs:
+  promote:
+    if: ${{ inputs.confirm == 'PROMOTE' }}
+    runs-on: ubuntu-latest
+    env:
+      PROD_REPO: joel-blackburn/math-bike-game
+    steps:
+      - name: Check out beta
+        uses: actions/checkout@v4
+        with:
+          path: beta
+
+      - name: Check out production
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.PROD_REPO }}
+          token: ${{ secrets.PROD_REPO_TOKEN }}
+          path: prod
+
+      - name: Copy beta into production and switch to the prod channel
+        run: |
+          cp beta/index.html prod/index.html
+          sed -i "s/const CHANNEL='beta';/const CHANNEL='prod';/" prod/index.html
+          sed -i 's/<title>Sum Shredders BETA – /<title>Sum Shredders – /' prod/index.html
+          # Safety check: stop if the switch didn't happen
+          grep -q "const CHANNEL='prod';" prod/index.html
+
+      - name: Commit and push to production
+        run: |
+          cd prod
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add index.html
+          if git diff --cached --quiet; then echo "Production already matches beta. Nothing to do."; exit 0; fi
+          git commit -m "Promote beta (${GITHUB_SHA::7}) to production"
+          git push
+          echo "### ✅ Promoted beta ${GITHUB_SHA::7} to production" >> $GITHUB_STEP_SUMMARY
