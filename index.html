@@ -504,7 +504,7 @@ const canSpeak='speechSynthesis' in window;let voice=null;
 function pickVoice(){if(!canSpeak)return;const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en[-_]AU/i.test(v.lang))||vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}
 if(canSpeak){pickVoice();try{speechSynthesis.onvoiceschanged=pickVoice;}catch(e){}}
 function say(text){stopSeq();if(!SET.voice||!canSpeak)return;try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-AU';u.rate=.95;u.pitch=1.1;speechSynthesis.speak(u);}catch(e){}}
-function hush(){stopSeq();if(canSpeak)try{speechSynthesis.cancel();}catch(e){}}
+function hush(){greetTok++;stopSeq();if(canSpeak)try{speechSynthesis.cancel();}catch(e){}}
 
 /* ================= DAD'S VOICE (recorded clips in /voice) ================= */
 const VO={has:new Set(),buf:{},ready:false,cur:[],ver:'',pre:false};
@@ -532,16 +532,28 @@ async function loadClip(id){if(VO.buf[id])return VO.buf[id];if(!AU.ctx)throw 0;c
 function preloadVoice(){if(!VO.ready||!AU.ctx||VO.pre)return;VO.pre=true;[...VO.has].forEach(id=>loadClip(id).catch(()=>{}));}
 function stopSeq(){seqTok++;VO.cur.forEach(s=>{try{s.stop();}catch(e){}});VO.cur=[];duck(false);}
 function duck(on){if(AU.ctx&&AU.music)try{AU.music.gain.setTargetAtTime(SET.music?(on?.06:.2):0,AU.ctx.currentTime,.08);}catch(e){}}
-async function playSeq(ids,fallback){audioInit();if(!AU.ctx){say(fallback);return;}stopSeq();if(canSpeak)try{speechSynthesis.cancel();}catch(e){}
- const tok=++seqTok;let bufs;try{bufs=await Promise.all(ids.map(loadClip));}catch(e){if(tok===seqTok&&fallback)say(fallback);return;}
- if(tok!==seqTok)return;let t=AU.ctx.currentTime+.03;duck(true);
+async function playSeq(ids,fallback){audioInit();if(!AU.ctx){say(fallback);return false;}stopSeq();if(canSpeak)try{speechSynthesis.cancel();}catch(e){}
+ const tok=++seqTok;let bufs;try{bufs=await Promise.all(ids.map(loadClip));}catch(e){if(tok===seqTok&&fallback)say(fallback);return false;}
+ if(tok!==seqTok)return false;let t=AU.ctx.currentTime+.03;duck(true);
  for(const b of bufs){const s=AU.ctx.createBufferSource();s.buffer=b;s.connect(AU.voice);s.start(t);VO.cur.push(s);t+=b.duration+.035;}
- const ms=(t-AU.ctx.currentTime)*1000+120;setTimeout(()=>{if(tok===seqTok){VO.cur=[];duck(false);}},ms);}
+ const ms=(t-AU.ctx.currentTime)*1000+80;return new Promise(res=>setTimeout(()=>{const live=tok===seqTok;if(live){VO.cur=[];duck(false);}res(live);},ms));}
 /* speak: Dad's clips when all are recorded, otherwise the robot voice */
-function speak(ids,text){if(!SET.voice)return;if(narr()==='dad'&&ids&&ids.length&&ids.every(id=>VO.has.has(id))){playSeq(ids,text);return;}if(text)say(text);}
+function speak(ids,text){greetTok++;if(!SET.voice)return;if(narr()==='dad'&&ids&&ids.length&&ids.every(id=>VO.has.has(id))){playSeq(ids,text);return;}if(text)say(text);}
 /* dadOnly: extra Dad lines the robot never says (countdown, hype) */
-function dadOnly(ids){if(!SET.voice||narr()!=='dad'||!ids.every(id=>VO.has.has(id)))return;playSeq(ids,null);}
-window.__voice={VO,qVoice,eqVoice,numV,get GEN(){return GEN;}};
+function dadOnly(ids){greetTok++;if(!SET.voice||narr()!=='dad'||!ids.every(id=>VO.has.has(id)))return;playSeq(ids,null);}
+/* greet: Dad says "Hi…", then the player's name (Dad's recording if there is one, otherwise the
+   computer voice, since players can be called anything), then Dad says "Suit up!" */
+let greetTok=0;
+function sayP(text){return new Promise(res=>{if(!canSpeak){res();return;}let done=false;const fin=()=>{if(!done){done=true;res();}};
+ try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-AU';u.rate=1;u.pitch=1.1;u.onend=fin;u.onerror=fin;setTimeout(fin,600+text.length*150);speechSynthesis.speak(u);}catch(e){fin();}});}
+async function greet(name){const fb=`Hi ${name}! Suit up!`;if(!SET.voice)return;
+ if(narr()!=='dad'||!['e_hi','e_suitup'].every(i=>VO.has.has(i))){speak(null,fb);return;}
+ const nc=nameClip(name);if(VO.has.has(nc)){speak(['e_hi',nc,'e_suitup'],fb);return;}
+ const my=++greetTok;
+ if(!await playSeq(['e_hi'],fb)||my!==greetTok)return;
+ if(canSpeak)await sayP(name);if(my!==greetTok)return;
+ playSeq(['e_suitup'],null);}
+window.__voice={greet,VO,qVoice,eqVoice,numV,get GEN(){return GEN;}};
 
 /* ================= THREE SETUP ================= */
 const canvas=$('#c');
@@ -1055,7 +1067,7 @@ $('#sSetup').addEventListener('click',e=>{
  const t=e.target.closest('[data-veh],[data-rider],[data-helmet],[data-paint],[data-diff],[data-mystery],[data-narr]');if(!t)return;
  if(t.classList.contains('locked')){sfx('wrong');if(t.dataset.mystery)shout('🤫 Find the secret code!','trick');return;}
  sfx('click');const ds=t.dataset;
- if(ds.veh)S.sel.vehicle=ds.veh;if(ds.rider)S.sel.rider=ds.rider;if(ds.helmet!=null)S.sel.helmet=+ds.helmet;if(ds.paint!=null)S.sel.paint=+ds.paint;if(ds.diff)S.sel.diff=ds.diff;if(ds.narr){S.sel.narrator=ds.narr;save();renderSetup();if(ds.narr==='dad')speak(VO.has.has(nameClip(S.name))?['e_hi',nameClip(S.name),'e_suitup']:['e_suitup'],'Suit up!');else say(`Hi ${S.name}! Suit up!`);return;}
+ if(ds.veh)S.sel.vehicle=ds.veh;if(ds.rider)S.sel.rider=ds.rider;if(ds.helmet!=null)S.sel.helmet=+ds.helmet;if(ds.paint!=null)S.sel.paint=+ds.paint;if(ds.diff)S.sel.diff=ds.diff;if(ds.narr){S.sel.narrator=ds.narr;save();renderSetup();greet(S.name);return;}
  save();renderSetup();if(!ds.diff)respawnPreview();
 });
 
@@ -1088,7 +1100,7 @@ $('#playerList').addEventListener('click',e=>{
  const nw=e.target.closest('[data-new]');if(nw){sfx('click');openName(null);return;}
  const c=e.target.closest('[data-pid]');if(c){sfx('click');selectProfile(c.dataset.pid);}
 });
-function selectProfile(id){const p=DB.profiles.find(x=>x.id===id);if(!p)return;S=p;DB.cur=id;save();respawnPreview();setMode('setup');speak(VO.has.has(nameClip(p.name))?['e_hi',nameClip(p.name),'e_suitup']:['e_suitup'],`Hi ${p.name}! Suit up!`);}
+function selectProfile(id){const p=DB.profiles.find(x=>x.id===id);if(!p)return;S=p;DB.cur=id;save();respawnPreview();setMode('setup');greet(p.name);}
 let editPid=null,delArm=false;
 function openName(pid){editPid=pid;delArm=false;const p=pid&&DB.profiles.find(x=>x.id===pid);
  $('#nameTitle').textContent=p?'Edit rider':'New rider';$('#nameInput').value=p?p.name:'';$('#nameErr').textContent='';
