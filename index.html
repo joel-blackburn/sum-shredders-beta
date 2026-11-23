@@ -2,13 +2,16 @@
 <html lang="en-AU">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#1b1f3b">
 <link rel="icon" type="image/png" sizes="32x32" href="brand/favicon-32.png">
 <link rel="apple-touch-icon" href="brand/apple-touch-icon.png">
 <link rel="manifest" href="brand/site.webmanifest">
 <meta name="author" content="Captain Dad Games">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Sum Shredders">
 <title>Sum Shredders BETA – Maths Bike Park</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Bungee&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -20,10 +23,10 @@
 :root{--ink:#1b1f3b;--yel:#ffd23f;--pink:#ff4f8b;--teal:#19c3b1;--orange:#ff8a3d;--cream:#fffdf5;--blue:#3a86ff}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 html,body{margin:0;height:100%;overflow:hidden;background:#8fd3ff;font-family:'Nunito',system-ui,sans-serif;color:var(--ink);touch-action:manipulation}
-#c{position:fixed;inset:0;width:100vw;height:100vh;display:block}
+#c{position:fixed;inset:0;width:100%;height:100%;display:block}
 .h{font-family:'Bungee',Impact,'Arial Black',sans-serif;letter-spacing:.02em;font-weight:400}
 button{font-family:inherit;color:inherit}
-.screen{position:fixed;inset:0;display:none;z-index:10;pointer-events:none}
+.screen{position:fixed;inset:0;display:none;z-index:10;pointer-events:none;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
 .screen.show{display:flex}
 .screen > *{pointer-events:auto}
 .center{align-items:center;justify-content:center;flex-direction:column}
@@ -38,7 +41,7 @@ button{font-family:inherit;color:inherit}
 .btn.sm{font-size:15px;padding:8px 14px;border-width:3px;box-shadow:0 4px 0 var(--ink)}
 
 /* toggles */
-#toggles{position:fixed;top:12px;right:12px;z-index:60;display:flex;gap:8px}
+#toggles{position:fixed;top:calc(12px + env(safe-area-inset-top));right:calc(12px + env(safe-area-inset-right));z-index:60;display:flex;gap:8px}
 .tg{width:48px;height:48px;border-radius:50%;border:4px solid var(--ink);background:#fff;font-size:22px;cursor:pointer;box-shadow:0 4px 0 var(--ink);position:relative;display:flex;align-items:center;justify-content:center;padding:0}
 .tg:active{transform:translateY(3px);box-shadow:0 1px 0 var(--ink)}
 .tg.off{background:#d9d9e3}
@@ -193,9 +196,11 @@ button{font-family:inherit;color:inherit}
 #selfie.c-br{right:14px;bottom:14px}#selfie.c-bl{left:14px;bottom:14px}#selfie.c-tr{right:14px;top:120px}#selfie.c-tl{left:14px;top:120px}
 #selfie.hide{display:none}
 @media (max-width:640px){#selfie{width:110px}#selfie.c-tr,#selfie.c-tl{top:150px}}
-#copyright{position:fixed;left:10px;bottom:8px;z-index:12;display:flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;color:#fff3e0;background:rgba(11,42,91,.72);padding:4px 10px 4px 5px;border-radius:999px;pointer-events:none;letter-spacing:.02em}
+#copyright{position:fixed;left:calc(10px + env(safe-area-inset-left));bottom:calc(8px + env(safe-area-inset-bottom));z-index:12;display:flex;align-items:center;gap:6px;font-family:'Nunito',sans-serif;font-weight:700;font-size:12px;color:#fff3e0;background:rgba(11,42,91,.72);padding:4px 10px 4px 5px;border-radius:999px;pointer-events:none;letter-spacing:.02em}
 #copyright img{width:18px;height:18px;border-radius:5px}
 #copyright.hide{display:none}
+.btn.hide{display:none}
+@media (max-height:500px){.logo{margin-bottom:10px}.logo .l1{font-size:58px}.logo .l2{font-size:50px}.logo .sub{font-size:15px;margin-top:6px;padding:4px 14px}.btn.big{font-size:22px;padding:10px 26px}.hint{display:none}#btnFullTip{margin-top:10px!important}.modal{padding:14px 20px;gap:8px}.modal .sub2{font-size:14px}}
 #err{display:none;position:fixed;inset:0;z-index:99;background:var(--cream);align-items:center;justify-content:center;text-align:center;padding:30px;font-weight:900;font-size:20px}
 
 @media (max-width:640px){
@@ -230,6 +235,7 @@ button{font-family:inherit;color:inherit}
   <button id="tgVoice" class="tg" title="Read questions aloud" aria-label="Read aloud">🗣️</button>
   <button id="tgSfx" class="tg" title="Sound effects" aria-label="Sound effects">🔊</button>
   <button id="tgCam" class="tg off hide" title="Selfie camera" aria-label="Selfie camera">📷</button>
+  <button id="tgFull" class="tg hide" title="Full screen" aria-label="Full screen">⛶</button>
   <button id="btnPause" class="tg hide" title="Pause" aria-label="Pause">⏸</button>
 </div>
 
@@ -237,6 +243,17 @@ button{font-family:inherit;color:inherit}
   <div class="logo"><div class="l1 h">SUM</div><div class="l2 h">SHREDDERS</div><div class="sub">Maths Bike Park</div><div class="betaTag">BETA</div></div>
   <button class="btn big pink bob" id="btnPlay">PLAY ▶</button>
   <div class="hint">Answer maths questions to land massive jumps! 🚲 🛹 🛴</div>
+  <button class="btn white sm hide" id="btnFullTip" style="margin-top:14px">📲 Play full screen</button>
+</section>
+
+<section id="sFull" class="screen center dim">
+  <div class="panel modal" style="text-align:left">
+    <h2 class="h" style="text-align:center">Play full screen</h2>
+    <div class="sub2"><b>Best: add it to your Home Screen</b><br>1. Tap the <b>Share</b> button (the square with an arrow ↑).<br>2. Choose <b>Add to Home Screen</b>, then <b>Add</b>.<br>3. Open Sum Shredders from its new icon. No browser bars!</div>
+    <div class="sub2"><b>Quick way, in Safari:</b> tap <b>aA</b> in the address bar, then <b>Hide Toolbar</b>.</div>
+    <div class="sub2" style="font-size:13px;opacity:.85">Note: the Home Screen app keeps its own players and progress, separate from Safari.</div>
+    <button class="btn pink" id="btnFullOk" style="align-self:center">Got it!</button>
+  </div>
 </section>
 
 <section id="sPlayers" class="screen center">
@@ -1379,6 +1396,19 @@ $('#btnCrashMap').onclick=()=>{sfx('click');toMap();};
 function resetMenuWorld(){G.accept=false;G.cur=null;clearTimers();hush();G.paused=false;if(parkIdx!==0)buildWorld(0);spawnRider();R.z=R.prevZ=6;mus.key=0;mus.bpm=110;}
 function toMap(){resetMenuWorld();setMode('map');}
 function setToggle(id,key){const b=$(id);b.classList.toggle('off',!SET[key]);}
+/* ---------- full screen ---------- */
+const docEl=document.documentElement;
+const fsOK=!!(docEl.requestFullscreen||docEl.webkitRequestFullscreen)&&(document.fullscreenEnabled||document.webkitFullscreenEnabled);
+const isStandalone=(window.matchMedia&&matchMedia('(display-mode: standalone), (display-mode: fullscreen)').matches)||navigator.standalone===true;
+const isIPhone=/iPhone|iPod/.test(navigator.userAgent);
+const fsEl=()=>document.fullscreenElement||document.webkitFullscreenElement;
+if(fsOK&&!isStandalone){$('#tgFull').classList.remove('hide');}
+$('#tgFull').onclick=()=>{sfx('click');try{if(fsEl()){(document.exitFullscreen||document.webkitExitFullscreen).call(document);}else{(docEl.requestFullscreen||docEl.webkitRequestFullscreen).call(docEl);}}catch(e){}};
+['fullscreenchange','webkitfullscreenchange'].forEach(ev=>document.addEventListener(ev,()=>{$('#tgFull').classList.toggle('off',!fsEl());setTimeout(applyView,150);}));
+if(isIPhone&&!isStandalone&&!fsOK){$('#btnFullTip').classList.remove('hide');}
+$('#btnFullTip').onclick=()=>{sfx('click');show('#sFull',1);};
+$('#btnFullOk').onclick=()=>{sfx('click');show('#sFull',0);};
+window.addEventListener('orientationchange',()=>setTimeout(applyView,300));
 function refreshToggles(){setToggle('#tgMusic','music');setToggle('#tgVoice','voice');setToggle('#tgSfx','sfx');$('#btnSay').classList.toggle('hide',!SET.voice||!canSpeak);}
 $('#tgMusic').onclick=()=>{SET.music=!SET.music;save();refreshToggles();audioInit();if(AU.music)AU.music.gain.value=SET.music?.2:0;};
 $('#tgVoice').onclick=()=>{SET.voice=!SET.voice;save();refreshToggles();if(!SET.voice)hush();else if(G.mode==='play'&&G.accept&&G.cur)say(G.cur.speak);else speak(['e_voiceon'],'Voice on!');};
