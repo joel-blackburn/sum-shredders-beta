@@ -35,6 +35,8 @@ jobs:
           if [ -d beta/brand ]; then rm -rf prod/brand && cp -r beta/brand prod/brand; fi
           sed -i "s/const CHANNEL='beta';/const CHANNEL='prod';/" prod/index.html
           sed -i 's/<title>Sum Shredders BETA – /<title>Sum Shredders – /' prod/index.html
+          sed -i 's#brand/beta/#brand/#g; s#content="Shredders β"#content="Sum Shredders"#' prod/index.html
+          rm -rf prod/brand/beta
           # Safety check: stop if the switch didn't happen
           grep -q "const CHANNEL='prod';" prod/index.html
 
