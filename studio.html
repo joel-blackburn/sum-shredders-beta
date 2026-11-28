@@ -133,7 +133,7 @@ input[type=text],input[type=number]{font-family:'Nunito';font-weight:900;font-si
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s);
-const PARKS=['Sunny Meadow','Forest Trails','Desert Canyon','Snow Mountain','Night City','Water Park','Japan','Moon Base','Footy Stadium','Candy Land'];
+const PARKS=['Sunny Meadow','Forest Trails','Desert Canyon','Snow Mountain','Night City','Water Park','Japan','Moon Base','Footy Stadium','Candy Land','North Pole'];
 const NUMW=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 const TENW={20:'twenty',30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety'};
 const C=[];
@@ -158,7 +158,7 @@ PARKS.forEach((p,i)=>add('Parks','park'+i,p+'!','Announcer voice'));
  ['e_wipeout','Wipeout!','Funny crash'],['e_bawkwipeout','Bawk! Wipeout!','Chicken crash, do your best chicken'],['e_parkcomplete','Park complete!','Celebrating'],
  ['e_yougot','You got…','Lead-in to the stars'],['e_1star','one star!',''],['e_2stars','two stars!',''],['e_3stars','three stars!','Extra excited'],
  ['e_champion','Champion! You finished every park!','The very end. Make it epic'],['e_bonuspark','Bonus park unlocked!','Surprise!'],
- ['e_chicken','Bawk bawk! You unlocked the secret chicken!','Silly'],['e_hi','Hi…','Lead-in to a name'],['e_suitup','Suit up!','Before picking a ride'],['e_voiceon','Voice on!','When read-aloud is switched on']]
+ ['e_chicken','Bawk bawk! You unlocked the secret chicken!','Silly'],['e_hohoho','Ho ho ho!','Big jolly Santa laugh'],['e_xmas','Ho ho ho! You unlocked the North Pole!','Christmas secret unlocked'],['e_presents','Oh no! The presents!','Santa crash'],['e_merryxmas','Ho ho ho! Merry Christmas!','Finishing the North Pole park'],['e_hi','Hi…','Lead-in to a name'],['e_suitup','Suit up!','Before picking a ride'],['e_voiceon','Voice on!','When read-aloud is switched on']]
  .forEach(([id,s,t])=>add('Game events',id,s,t));
 [['q_whatis','What is…','Start of a question. Keep the voice up, like more is coming'],['w_plus','plus',''],['w_takeaway','take away',''],['w_times','times',''],['w_dividedby','divided by',''],
  ['w_is','is','As in "3 plus 4 IS 7"'],['q_whatnumber','What number…','As in "What number plus 3 makes 8?"'],['w_makes','makes',''],

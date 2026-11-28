@@ -9,6 +9,12 @@ and is only ever updated by the **Promote beta to production** GitHub Action. Ne
 - Save data: beta key `sumShredders_beta_v2`, prod key `sumShredders_v2` (migrates from `sumShredders_v1`).
 - Test changes in a headless browser before pushing. Commit with clear messages.
 
+## Secrets
+- Chicken: type `sum` on the rider setup screen (or tap S-U-M in the "Suit up, max out!" heading).
+- North Pole (Christmas park, `PARKS[XMAS]`, `xmas:true`): type `xmas` (or tap X-M-A-S in the heading). Saved per profile as `xmas`. It is not part of the park unlock chain and never counts as the "last" park.
+- In the North Pole you always ride as Santa (`SANTA`) in a reindeer sleigh (`BUILD.sleigh`); the music switches to Jingle Bells (traditional, public domain) via `mus.xmas`.
+- Don't add copyrighted characters (e.g. the Grinch, Max, Rudolph); keep characters original or public domain.
+
 ## Dad's voice
 - `studio.html` is a hidden recording page (beta.sumshredders.com/studio.html). Joel records clips and exports a zip.
 - Process a zip with `python3 tools/process_voice.py <zip>`. This writes `voice/<id>.mp3` and `voice/index.json`, then commit.
