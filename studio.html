@@ -261,13 +261,23 @@ $('#btnTestNum').onclick=()=>{const n=Math.round(+$('#numIn').value);if(!(n>=0&&
 /* ---------- export ---------- */
 $('#btnZip').onclick=()=>zipClips(C.filter(c=>REC[c.id]).map(c=>c.id),'');
 $('#btnZipXmas').onclick=()=>zipClips(C.filter(c=>c.group==='🎄 Christmas'&&REC[c.id]).map(c=>c.id),'christmas-');
-async function zipClips(ids,tag){const out=$('#zipOut');if(!ids.length){out.className='status';out.textContent=tag?'Record a Christmas clip first!':'Record something first!';return;}
- if(!window.JSZip){out.textContent='Zip tool didn\'t load. Check your internet and refresh.';return;}
+async function zipClips(ids,tag){const out=$('#zipOut');if(!ids.length){out.className='status';out.textContent=tag?'Record a Christmas clip first!':'Record something first!';out.scrollIntoView({block:'center',behavior:'smooth'});return;}
+ if(!window.JSZip){out.className='status';out.textContent='Zip tool didn\'t load. Check your internet and refresh.';return;}
  out.className='status';out.textContent='Packing…';const z=new JSZip();const man={app:'sum-shredders',made:new Date().toISOString(),names:NAMES,clips:[]};
  for(const id of ids){const r=REC[id],f=id+'.'+extFor(r.type);z.file(f,r.blob);man.clips.push({id,file:f,say:C.find(c=>c.id===id).say});}
  z.file('manifest.json',JSON.stringify(man,null,1));
- const blob=await z.generateAsync({type:'blob'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`sum-shredders-voice-${tag}${new Date().toISOString().slice(0,10)}.zip`;document.body.appendChild(a);a.click();a.remove();
- out.className='status ok';out.textContent=`✓ Downloaded ${ids.length} clip${ids.length>1?'s':''}. Now attach the zip in your chat with Claude.`;}
+ const blob=await z.generateAsync({type:'blob',mimeType:'application/zip'});
+ const name=`sum-shredders-voice-${tag}${new Date().toISOString().slice(0,10)}.zip`,url=URL.createObjectURL(blob);
+ /* Phones (iPhone especially) only allow a download straight after a tap, and packing takes a moment,
+    so show a Save button (and Share, where the phone supports it) for a second tap. Computers also get the file straight away. */
+ const file=(()=>{try{return new File([blob],name,{type:'application/zip'});}catch(e){return null;}})();
+ const canShare=!!(file&&navigator.canShare&&navigator.canShare({files:[file]}));
+ out.className='status ok';
+ out.innerHTML=`✓ Your zip is ready: ${ids.length} clip${ids.length>1?'s':''}.<div class="row" style="margin-top:10px"><a class="btn pink" id="zipSave" href="${url}" download="${name}">💾 Save zip</a>${canShare?'<button class="btn white" id="zipShare">📤 Share</button>':''}</div><div class="small" style="margin-top:8px">On iPhone: tap <b>Save zip</b>, then <b>Download</b>. It goes into your Files app (Downloads). Or tap <b>Share</b> to send it straight to the Claude app. Then attach the zip in your chat with Claude.</div>`;
+ if(canShare)$('#zipShare').onclick=async()=>{try{await navigator.share({files:[file],title:name});}catch(e){}};
+ out.scrollIntoView({block:'center',behavior:'smooth'});
+ if(!/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)&&!(navigator.maxTouchPoints>1&&/Macintosh/.test(navigator.userAgent))){try{$('#zipSave').click();}catch(e){}}
+}
 let clearArm=false;
 $('#btnClear').onclick=async()=>{if(!clearArm){clearArm=true;$('#btnClear').textContent='Tap again to delete everything';setTimeout(()=>{clearArm=false;$('#btnClear').textContent='Delete all recordings';},4000);return;}
  await delAll();REC={};clearArm=false;$('#btnClear').textContent='Delete all recordings';render();$('#zipOut').textContent='All recordings deleted.';};
