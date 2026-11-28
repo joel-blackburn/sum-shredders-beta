@@ -15,6 +15,13 @@ and is only ever updated by the **Promote beta to production** GitHub Action. Ne
 - In the North Pole you always ride as Santa (`SANTA`) in a reindeer sleigh (`BUILD.sleigh`); the music switches to Jingle Bells (traditional, public domain) via `mus.xmas`.
 - Don't add copyrighted characters (e.g. the Grinch, Max, Rudolph); keep characters original or public domain.
 
+## Race parks, Spooky scare, daily challenge
+- Dino Jungle, Food Land, Spooky Land (`open:true`, `race:true`; ids in `OPEN`) are open to everyone, listed first on the map, and never count toward the main unlock chain or "Champion" (`LASTP` is the last main park).
+- Rival: Dash (`RIVAL`, `spawnRival`/`updateRival`) races at x=-1.25 on a timer per jump ({rookie:12.5,pro:10.5,legend:9}s x park `rt`), with rubber-banding so races stay close. Beating him: +500 and `prog[level].race[park]=1`.
+- Spooky Land jump scare: one cartoon monster (`jumpScare`, camera child) after a random jump 3-5. Per-player `sel.scare` switch on the setup screen (step 7); keep it silly, not gory.
+- Daily challenge: same for everyone each day (seeded by date): one of the race parks plus a goal (beat Dash / no mistakes / 5 in a row). Saved per profile in `daily` {last, streak, best, total}; streak rewards are items with `d:3` and `d:7`.
+- `ANIM` holds per-frame scenery animations; it is reset in `buildWorld`.
+
 ## Dad's voice
 - `studio.html` is a hidden recording page (beta.sumshredders.com/studio.html). Joel records clips and exports a zip.
 - Process a zip with `python3 tools/process_voice.py <zip>`. This writes `voice/<id>.mp3` and `voice/index.json`, then commit.

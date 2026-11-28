@@ -123,7 +123,7 @@ input[type=text],input[type=number]{font-family:'Nunito';font-weight:900;font-si
   <div class="panel hide" id="export">
     <h3 class="h" style="margin:0 0 6px;font-size:18px">📦 Send to Claude</h3>
     <div class="small" style="margin-bottom:10px">When you're done (or want to try a batch), download the zip and attach it in your chat with Claude. Claude cleans up the clips and adds them to the beta. A smaller zip (like just the Christmas clips) is fine: clips already in the game stay as they are.</div>
-    <div class="row"><button class="btn pink" id="btnZip">⬇️ Download voice pack (.zip)</button><button class="btn" id="btnZipXmas" style="background:#c1121f;color:#fff">🎄 Christmas clips only (.zip)</button><button class="btn white sm" id="btnClear">Delete all recordings</button></div>
+    <div class="row"><button class="btn pink" id="btnZip">⬇️ Download voice pack (.zip)</button><button class="btn" id="btnZipXmas" style="background:#c1121f;color:#fff">🎄 Christmas clips only (.zip)</button><button class="btn" id="btnZipNew" style="background:#84cc16;color:#1b1f3b">🏁 New parks clips only (.zip)</button><button class="btn white sm" id="btnClear">Delete all recordings</button></div>
     <div class="status" id="zipOut"></div>
   </div>
 </div>
@@ -133,7 +133,7 @@ input[type=text],input[type=number]{font-family:'Nunito';font-weight:900;font-si
 (()=>{
 'use strict';
 const $=s=>document.querySelector(s);
-const PARKS=['Sunny Meadow','Forest Trails','Desert Canyon','Snow Mountain','Night City','Water Park','Japan','Moon Base','Footy Stadium','Candy Land','North Pole'];
+const PARKS=['Sunny Meadow','Forest Trails','Desert Canyon','Snow Mountain','Night City','Water Park','Japan','Moon Base','Footy Stadium','Candy Land','North Pole','Dino Jungle','Food Land','Spooky Land'];
 const NUMW=['zero','one','two','three','four','five','six','seven','eight','nine','ten','eleven','twelve','thirteen','fourteen','fifteen','sixteen','seventeen','eighteen','nineteen'];
 const TENW={20:'twenty',30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy',80:'eighty',90:'ninety'};
 const C=[];
@@ -142,6 +142,10 @@ const add=(group,id,say,tip)=>C.push({group,id,say,tip:tip||''});
 [['park10','North Pole!','Park announcer voice'],['e_hohoho','Ho ho ho!','Big jolly Santa laugh'],['e_xmas','Ho ho ho! You unlocked the North Pole!','Christmas secret unlocked'],
  ['e_presents','Oh no! The presents!','Santa crash, presents everywhere'],['e_merryxmas','Ho ho ho! Merry Christmas!','Finishing the North Pole park']]
  .forEach(([id,s,t])=>add('🎄 Christmas',id,s,t));
+[['park11','Dino Jungle!','Park announcer voice'],['park12','Food Land!','Park announcer voice'],['park13','Spooky Land!','Park announcer voice, a bit spooky'],
+ ['e_racedash','Race Dash to the finish!','Fired up, a challenge'],['e_beatdash','You beat Dash!','Huge cheer'],['e_dashwon','Dash won this time!','Gentle, try again next time'],
+ ['e_gotyou','Ha ha! Got you!','After the Spooky Land monster jumps out'],['e_daily','Daily challenge complete!','Proud, celebrating']]
+ .forEach(([id,s,t])=>add('🏁 New parks',id,s,t));
 add('Praise','p_awesome','Awesome!','Excited!');
 add('Praise','p_nailedit','Nailed it!','Proud and pumped');
 add('Praise','p_yes','Yes!','Short and punchy');
@@ -260,8 +264,9 @@ $('#btnTestNum').onclick=()=>{const n=Math.round(+$('#numIn').value);if(!(n>=0&&
 
 /* ---------- export ---------- */
 $('#btnZip').onclick=()=>zipClips(C.filter(c=>REC[c.id]).map(c=>c.id),'');
+$('#btnZipNew').onclick=()=>zipClips(C.filter(c=>c.group==='🏁 New parks'&&REC[c.id]).map(c=>c.id),'new-parks-');
 $('#btnZipXmas').onclick=()=>zipClips(C.filter(c=>c.group==='🎄 Christmas'&&REC[c.id]).map(c=>c.id),'christmas-');
-async function zipClips(ids,tag){const out=$('#zipOut');if(!ids.length){out.className='status';out.textContent=tag?'Record a Christmas clip first!':'Record something first!';out.scrollIntoView({block:'center',behavior:'smooth'});return;}
+async function zipClips(ids,tag){const out=$('#zipOut');if(!ids.length){out.className='status';out.textContent=tag?'Record a clip in that section first!':'Record something first!';out.scrollIntoView({block:'center',behavior:'smooth'});return;}
  if(!window.JSZip){out.className='status';out.textContent='Zip tool didn\'t load. Check your internet and refresh.';return;}
  out.className='status';out.textContent='Packing…';const z=new JSZip();const man={app:'sum-shredders',made:new Date().toISOString(),names:NAMES,clips:[]};
  for(const id of ids){const r=REC[id],f=id+'.'+extFor(r.type);z.file(f,r.blob);man.clips.push({id,file:f,say:C.find(c=>c.id===id).say});}
