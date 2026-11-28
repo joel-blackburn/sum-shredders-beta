@@ -581,18 +581,13 @@ async function playSeq(ids,fallback){audioInit();if(!AU.ctx){say(fallback);retur
 function speak(ids,text){greetTok++;if(!SET.voice)return;if(narr()==='dad'&&ids&&ids.length&&ids.every(id=>VO.has.has(id))){playSeq(ids,text);return;}if(text)say(text);}
 /* dadOnly: extra Dad lines the robot never says (countdown, hype) */
 function dadOnly(ids){greetTok++;if(!SET.voice||narr()!=='dad'||!ids.every(id=>VO.has.has(id)))return;playSeq(ids,null);}
-/* greet: Dad says "Hi…", then the player's name (Dad's recording if there is one, otherwise the
-   computer voice, since players can be called anything), then Dad says "Suit up!" */
+/* greet: with the Dad narrator, Dad says "Hi… Suit up!" and only says the player's name if he has
+   recorded a clip for it (name_<name>). The computer voice is never mixed into Dad's greeting. */
 let greetTok=0;
-function sayP(text){return new Promise(res=>{if(!canSpeak){res();return;}let done=false;const fin=()=>{if(!done){done=true;res();}};
- try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);if(voice){u.voice=voice;u.lang=voice.lang;}else u.lang='en-AU';u.rate=1;u.pitch=1.1;u.onend=fin;u.onerror=fin;setTimeout(fin,600+text.length*150);speechSynthesis.speak(u);}catch(e){fin();}});}
-async function greet(name){const fb=`Hi ${name}! Suit up!`;if(!SET.voice)return;
- if(narr()!=='dad'||!['e_hi','e_suitup'].every(i=>VO.has.has(i))){speak(null,fb);return;}
- const nc=nameClip(name);if(VO.has.has(nc)){speak(['e_hi',nc,'e_suitup'],fb);return;}
- const my=++greetTok;
- if(!await playSeq(['e_hi'],fb)||my!==greetTok)return;
- if(canSpeak)await sayP(name);if(my!==greetTok)return;
- playSeq(['e_suitup'],null);}
+function greet(name){if(!SET.voice)return;
+ if(narr()!=='dad'){speak(null,`Hi ${name}! Suit up!`);return;}
+ const nc=nameClip(name);
+ speak(VO.has.has(nc)?['e_hi',nc,'e_suitup']:['e_hi','e_suitup'],'Hi! Suit up!');}
 /* ================= SELFIE CAMERA (shown on screen only, never recorded or sent) ================= */
 let camStream=null;
 const defCorner=()=>window.innerWidth<1000?'tr':'br';
