@@ -122,8 +122,8 @@ input[type=text],input[type=number]{font-family:'Nunito';font-weight:900;font-si
 
   <div class="panel hide" id="export">
     <h3 class="h" style="margin:0 0 6px;font-size:18px">📦 Send to Claude</h3>
-    <div class="small" style="margin-bottom:10px">When you're done (or want to try a batch), download the zip and attach it in your chat with Claude. Claude cleans up the clips and adds them to the beta.</div>
-    <div class="row"><button class="btn pink" id="btnZip">⬇️ Download voice pack (.zip)</button><button class="btn white sm" id="btnClear">Delete all recordings</button></div>
+    <div class="small" style="margin-bottom:10px">When you're done (or want to try a batch), download the zip and attach it in your chat with Claude. Claude cleans up the clips and adds them to the beta. A smaller zip (like just the Christmas clips) is fine: clips already in the game stay as they are.</div>
+    <div class="row"><button class="btn pink" id="btnZip">⬇️ Download voice pack (.zip)</button><button class="btn" id="btnZipXmas" style="background:#c1121f;color:#fff">🎄 Christmas clips only (.zip)</button><button class="btn white sm" id="btnClear">Delete all recordings</button></div>
     <div class="status" id="zipOut"></div>
   </div>
 </div>
@@ -139,6 +139,9 @@ const TENW={20:'twenty',30:'thirty',40:'forty',50:'fifty',60:'sixty',70:'seventy
 const C=[];
 const add=(group,id,say,tip)=>C.push({group,id,say,tip:tip||''});
 // fun lines first so the game feels like Dad quickly
+[['park10','North Pole!','Park announcer voice'],['e_hohoho','Ho ho ho!','Big jolly Santa laugh'],['e_xmas','Ho ho ho! You unlocked the North Pole!','Christmas secret unlocked'],
+ ['e_presents','Oh no! The presents!','Santa crash, presents everywhere'],['e_merryxmas','Ho ho ho! Merry Christmas!','Finishing the North Pole park']]
+ .forEach(([id,s,t])=>add('🎄 Christmas',id,s,t));
 add('Praise','p_awesome','Awesome!','Excited!');
 add('Praise','p_nailedit','Nailed it!','Proud and pumped');
 add('Praise','p_yes','Yes!','Short and punchy');
@@ -153,12 +156,12 @@ add('Hype','c_sick','Sick!','Skate-park cool');
 add('Hype','c_radical','Radical!','Even bigger');
 add('Hype','c_unstoppable','Unstoppable!','Huge');
 add('Hype','c_legendary','Legendary!','Absolutely massive');
-PARKS.forEach((p,i)=>add('Parks','park'+i,p+'!','Announcer voice'));
+PARKS.forEach((p,i)=>{if(i<10)add('Parks','park'+i,p+'!','Announcer voice');});
 [['e_letsride',"Let's ride!",'Said straight after the park name'],['e_lowgravity','Low gravity!','Floaty, spacey'],['e_go','Go!','Countdown, after you hear 3, 2, 1'],
  ['e_wipeout','Wipeout!','Funny crash'],['e_bawkwipeout','Bawk! Wipeout!','Chicken crash, do your best chicken'],['e_parkcomplete','Park complete!','Celebrating'],
  ['e_yougot','You got…','Lead-in to the stars'],['e_1star','one star!',''],['e_2stars','two stars!',''],['e_3stars','three stars!','Extra excited'],
  ['e_champion','Champion! You finished every park!','The very end. Make it epic'],['e_bonuspark','Bonus park unlocked!','Surprise!'],
- ['e_chicken','Bawk bawk! You unlocked the secret chicken!','Silly'],['e_hohoho','Ho ho ho!','Big jolly Santa laugh'],['e_xmas','Ho ho ho! You unlocked the North Pole!','Christmas secret unlocked'],['e_presents','Oh no! The presents!','Santa crash'],['e_merryxmas','Ho ho ho! Merry Christmas!','Finishing the North Pole park'],['e_hi','Hi…','Lead-in to a name'],['e_suitup','Suit up!','Before picking a ride'],['e_voiceon','Voice on!','When read-aloud is switched on']]
+ ['e_chicken','Bawk bawk! You unlocked the secret chicken!','Silly'],['e_hi','Hi…','Lead-in to a name'],['e_suitup','Suit up!','Before picking a ride'],['e_voiceon','Voice on!','When read-aloud is switched on']]
  .forEach(([id,s,t])=>add('Game events',id,s,t));
 [['q_whatis','What is…','Start of a question. Keep the voice up, like more is coming'],['w_plus','plus',''],['w_takeaway','take away',''],['w_times','times',''],['w_dividedby','divided by',''],
  ['w_is','is','As in "3 plus 4 IS 7"'],['q_whatnumber','What number…','As in "What number plus 3 makes 8?"'],['w_makes','makes',''],
@@ -256,13 +259,15 @@ $('#btnTestWin').onclick=()=>tryPlay(['e_parkcomplete','e_yougot','e_3stars'],'P
 $('#btnTestNum').onclick=()=>{const n=Math.round(+$('#numIn').value);if(!(n>=0&&n<=999))return;tryPlay(N(n),String(n));};
 
 /* ---------- export ---------- */
-$('#btnZip').onclick=async()=>{const out=$('#zipOut');const ids=C.filter(c=>REC[c.id]).map(c=>c.id);if(!ids.length){out.textContent='Record something first!';return;}
+$('#btnZip').onclick=()=>zipClips(C.filter(c=>REC[c.id]).map(c=>c.id),'');
+$('#btnZipXmas').onclick=()=>zipClips(C.filter(c=>c.group==='🎄 Christmas'&&REC[c.id]).map(c=>c.id),'christmas-');
+async function zipClips(ids,tag){const out=$('#zipOut');if(!ids.length){out.className='status';out.textContent=tag?'Record a Christmas clip first!':'Record something first!';return;}
  if(!window.JSZip){out.textContent='Zip tool didn\'t load. Check your internet and refresh.';return;}
  out.className='status';out.textContent='Packing…';const z=new JSZip();const man={app:'sum-shredders',made:new Date().toISOString(),names:NAMES,clips:[]};
  for(const id of ids){const r=REC[id],f=id+'.'+extFor(r.type);z.file(f,r.blob);man.clips.push({id,file:f,say:C.find(c=>c.id===id).say});}
  z.file('manifest.json',JSON.stringify(man,null,1));
- const blob=await z.generateAsync({type:'blob'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`sum-shredders-voice-${new Date().toISOString().slice(0,10)}.zip`;document.body.appendChild(a);a.click();a.remove();
- out.className='status ok';out.textContent=`✓ Downloaded ${ids.length} clips. Now attach the zip in your chat with Claude.`;};
+ const blob=await z.generateAsync({type:'blob'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`sum-shredders-voice-${tag}${new Date().toISOString().slice(0,10)}.zip`;document.body.appendChild(a);a.click();a.remove();
+ out.className='status ok';out.textContent=`✓ Downloaded ${ids.length} clip${ids.length>1?'s':''}. Now attach the zip in your chat with Claude.`;}
 let clearArm=false;
 $('#btnClear').onclick=async()=>{if(!clearArm){clearArm=true;$('#btnClear').textContent='Tap again to delete everything';setTimeout(()=>{clearArm=false;$('#btnClear').textContent='Delete all recordings';},4000);return;}
  await delAll();REC={};clearArm=false;$('#btnClear').textContent='Delete all recordings';render();$('#zipOut').textContent='All recordings deleted.';};
