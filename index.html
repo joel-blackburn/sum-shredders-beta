@@ -13,8 +13,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Shredders β">
 <title>Sum Shredders BETA – Maths Bike Park</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&family=Bungee&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="preload" href="fonts/bungee-400.woff2" as="font" type="font/woff2" crossorigin>
+<link href="fonts/fonts.css" rel="stylesheet">
 <script>
   window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
 </script>
@@ -356,7 +356,7 @@ button{font-family:inherit;color:inherit}
 <div id="confetti"></div>
 <div id="err">Sorry! This game needs a browser with 3D graphics (WebGL) switched on.</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="lib/three.min.js"></script>
 <script>
 (()=>{
 'use strict';
@@ -1437,6 +1437,11 @@ function frame(now){
 requestAnimationFrame(frame);
 window.__game={G,DB,get S(){return S;},startLevel,answer,setMode,get R(){return R;}};
 })();
+</script>
+<script>
+/* Offline support: saves the game on this device after the first visit (see sw.js). */
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){
+ window.addEventListener('load',()=>{navigator.serviceWorker.register('sw.js').catch(()=>{});});}
 </script>
 </body>
 </html>

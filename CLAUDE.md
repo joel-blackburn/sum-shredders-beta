@@ -1,6 +1,6 @@
 # Sum Shredders (beta repo)
 
-Kids' 3D maths bike-park game, one self-contained `index.html` (Three.js r128 from cdnjs).
+Kids' 3D maths bike-park game, one `index.html` with Three.js r128 bundled in `lib/`, self-hosted fonts in `fonts/` and offline support via `sw.js`.
 This repo deploys to **beta.sumshredders.com** (Vercel). Production lives in `joel-blackburn/math-bike-game`
 and is only ever updated by the **Promote beta to production** GitHub Action. Never push to production directly.
 
@@ -15,6 +15,11 @@ and is only ever updated by the **Promote beta to production** GitHub Action. Ne
 - The game loads `voice/index.json`. With narrator "Dad", it stitches clips (numbers, maths words, phrases) and falls
   back to the computer voice for any line with a missing clip. Clip IDs are defined in `studio.html`.
 - The promote workflow copies `voice/` to production along with `index.html` (not studio.html or tools/).
+
+## Bundled files and offline
+- `lib/three.min.js` (Three.js r128) and `fonts/` (Bungee, Nunito; OFL) are served from our own domain. Do not go back to CDNs or Google Fonts.
+- `sw.js` caches the game for offline play: the page and `voice/index.json` are network-first, everything else stale-while-revalidate. Voice clips listed in `voice/index.json` are pre-cached. Bump `VERSION` in sw.js only when the caching rules change.
+- The promote workflow copies `lib/`, `fonts/` and `sw.js` to production.
 
 ## Brand
 - Studio brand: **Captain Dad** (Captain Dad Games). Its design system artifact is https://claude.ai/artifact/S5LNCW8krvLEGFgpvRU4aW (logos, icon, palette: navy #0b2a5b, sky #33c3ff, gold #ffc90a, red #ff4d4d, cream #fff3e0; type: Baloo 2 ExtraBold for headings, Nunito for body, both Google Fonts). Use these for Captain Dad branding text; the game keeps Bungee for its own UI.

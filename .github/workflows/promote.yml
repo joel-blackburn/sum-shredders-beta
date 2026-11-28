@@ -33,6 +33,9 @@ jobs:
           # Dad's voice clips travel with the game (studio.html and tools/ stay beta-only)
           if [ -d beta/voice ]; then rm -rf prod/voice && cp -r beta/voice prod/voice; fi
           if [ -d beta/brand ]; then rm -rf prod/brand && cp -r beta/brand prod/brand; fi
+          # Bundled 3D engine, self-hosted fonts and the offline service worker
+          for d in lib fonts; do if [ -d beta/$d ]; then rm -rf prod/$d && cp -r beta/$d prod/$d; fi; done
+          if [ -f beta/sw.js ]; then cp beta/sw.js prod/sw.js; fi
           sed -i "s/const CHANNEL='beta';/const CHANNEL='prod';/" prod/index.html
           sed -i 's/<title>Sum Shredders BETA – /<title>Sum Shredders – /' prod/index.html
           sed -i 's#brand/beta/#brand/#g; s#content="Shredders β"#content="Sum Shredders"#' prod/index.html
@@ -48,6 +51,8 @@ jobs:
           git add index.html
           if [ -d voice ]; then git add -A voice; fi
           if [ -d brand ]; then git add -A brand; fi
+          for d in lib fonts; do if [ -d $d ]; then git add -A $d; fi; done
+          if [ -f sw.js ]; then git add sw.js; fi
           if git diff --cached --quiet; then echo "Production already matches beta. Nothing to do."; exit 0; fi
           git commit -m "Promote beta (${GITHUB_SHA::7}) to production"
           git push
