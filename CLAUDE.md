@@ -15,11 +15,12 @@ and is only ever updated by the **Promote beta to production** GitHub Action. Ne
 - In the North Pole you always ride as Santa (`SANTA`) in a reindeer sleigh (`BUILD.sleigh`); the music switches to Jingle Bells (traditional, public domain) via `mus.xmas`.
 - Don't add copyrighted characters (e.g. the Grinch, Max, Rudolph); keep characters original or public domain.
 
-## Race parks, Spooky scare, daily challenge
-- Dino Jungle, Food Land, Spooky Land (`open:true`, `race:true`; ids in `OPEN`) are open to everyone, listed first on the map, and never count toward the main unlock chain or "Champion" (`LASTP` is the last main park).
-- Rival: Dash (`RIVAL`, `spawnRival`/`updateRival`) races at x=-1.25 on a timer per jump ({rookie:12.5,pro:10.5,legend:9}s x park `rt`), with rubber-banding so races stay close. Beating him: +500 and `prog[level].race[park]=1`.
-- Spooky Land jump scare: one cartoon monster (`jumpScare`, camera child) after a random jump 3-5. Per-player `sel.scare` switch on the setup screen (step 7); keep it silly, not gory.
-- Daily challenge: same for everyone each day (seeded by date): one of the race parks plus a goal (beat Dash / no mistakes / 5 in a row). Saved per profile in `daily` {last, streak, best, total}; streak rewards are items with `d:3` and `d:7`.
+## Park order, racing, timer, daily challenge
+- Unlock order is `CHAIN` (all parks except the North Pole): the original ten, then Dino Jungle, Food Land, Spooky Land (bonus parks, unlocked one by one on each maths level). `LASTP` (Spooky Land) is the Champion park; `nextPark(i)` drives the Next button.
+- Racing Dash is a per-player option on the setup screen (step 7, `sel.race`, default on). When on, Dash races in every park except the North Pole. Dash (`RIVAL`, `spawnRival`/`updateRival`) rides at x=-1.25 on a timer per jump ({rookie:12.5,pro:10.5,legend:9}s x park `rt`, default 1) with rubber-banding. Beating him: +500 and `prog[level].race[park]=1` (🏁 on the map card).
+- Spooky Land jump scare is always on: one cartoon monster (`jumpScare`, camera child) after a random jump 3-5. Keep it silly, not gory.
+- Park timer: runs from GO to the finish (paused while paused), shown in the HUD; best time per park per level in `prog[level].time` (seconds), shown on map cards and the finish screen (NEW RECORD!).
+- Daily challenge: seeded by date, picked from parks this player has unlocked on their level; goals: beat Dash (only if racing is on) / no mistakes / 5 in a row. Saved per profile in `daily` {last, streak, best, total}; streak rewards are items with `d:3` and `d:7`.
 - `ANIM` holds per-frame scenery animations; it is reset in `buildWorld`.
 
 ## Dad's voice

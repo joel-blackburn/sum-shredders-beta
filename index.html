@@ -106,6 +106,7 @@ button{font-family:inherit;color:inherit}
 .daily .dG{font-weight:900;font-size:19px;line-height:1.2}
 .daily .dS{font-weight:800;font-size:15px}
 .daily.done{background:linear-gradient(120deg,#9be3b0,#19c3b1);cursor:default}
+.raceBar.hide{display:none}
 .raceBar{position:relative;height:26px;margin:8px 22px 2px 6px}
 .raceBar .rbT{position:absolute;left:0;right:0;top:11px;height:5px;border-radius:3px;background:rgba(27,31,59,.25)}
 .raceBar .rbM{position:absolute;top:0;transform:translateX(-50%);font-size:18px;line-height:22px;transition:left .25s linear}
@@ -116,6 +117,9 @@ button{font-family:inherit;color:inherit}
 .shake{animation:shake .45s linear 3}
 @keyframes shake{0%,100%{transform:translate(0,0)}20%{transform:translate(-9px,6px)}40%{transform:translate(8px,-7px)}60%{transform:translate(-7px,-5px)}80%{transform:translate(6px,8px)}}
 .shout.boo{margin-top:38vh;font-size:min(20vw,150px);color:#3dff7a;-webkit-text-stroke:4px #14051f;animation-duration:1.4s}
+.timer{font-family:'Bungee',Impact,sans-serif;font-size:15px;color:var(--ink);font-variant-numeric:tabular-nums}
+.winTime{margin-top:6px;font-family:'Bungee',Impact,sans-serif;font-size:18px;color:var(--ink)}
+.parkTime{font-weight:900;font-size:12px;margin-top:4px;opacity:.95}
 .hudDaily{margin-top:4px;font-weight:900;font-size:12px;background:#ffd23f;color:var(--ink);border-radius:999px;padding:2px 8px;display:inline-block}
 .mapHead{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
 .mapHead h2{margin:0;font-size:28px;flex:1}
@@ -202,7 +206,6 @@ button{font-family:inherit;color:inherit}
 .pcard.add .nm{text-shadow:none}
 .pedit{position:absolute;top:6px;right:6px;border:3px solid var(--ink);background:#fff;border-radius:50%;width:38px;height:38px;font-size:16px;cursor:pointer;box-shadow:0 3px 0 var(--ink);padding:0}
 .ribbon.xmas{background:#ffffff;color:#c1121f}
-.ribbon.race{background:#84cc16;color:#1b1f3b}
 .ribbon{position:absolute;top:8px;left:-8px;background:var(--yel);color:var(--ink);font-family:'Bungee',Impact,sans-serif;font-size:11px;padding:2px 8px;border:2px solid var(--ink);border-radius:6px;transform:rotate(-8deg);z-index:2}
 .pname{font-weight:900;font-size:12px;color:#6b6f92;line-height:1}
 #nameInput{font-family:'Bungee',Impact,sans-serif;font-size:26px;padding:12px 16px;border:4px solid var(--ink);border-radius:16px;text-align:center;width:100%;user-select:text;-webkit-user-select:text;outline:none;background:#fff;color:var(--ink)}
@@ -305,7 +308,7 @@ button{font-family:inherit;color:inherit}
     <div class="step"><h3>4. Ride colour</h3><div class="sw" id="paintRow"></div><div class="note">🔒 Finish parks to unlock more colours and secret riders!</div></div>
     <div class="step"><h3>5. Maths level</h3><div class="col" id="diffRow"></div></div>
     <div class="step"><h3>6. Narrator</h3><div class="row2" id="narrRow"></div></div>
-    <div class="step"><h3>7. Spooky Land scares</h3><div class="row2" id="scareRow"></div></div>
+    <div class="step"><h3>7. Race</h3><div class="row2" id="raceRow"></div></div>
     <button class="btn big pink" id="btnToMap">LET'S RIDE →</button>
   </div>
 </section>
@@ -323,7 +326,7 @@ button{font-family:inherit;color:inherit}
   <div class="hudTop">
     <div class="hudBox"><div class="pname" id="hudName"></div><div class="lvlName h" id="hudLevel"></div><div class="dots" id="hudDots"></div><div class="raceBar hide" id="raceBar" aria-label="Race against Dash"><i class="rbT"></i><span class="rbM" id="rbDash">😜</span><span class="rbM you" id="rbYou">🙂</span><span class="rbF">🏁</span></div></div>
     <div class="hearts" id="hudHearts"></div>
-    <div class="hudBox"><div class="score h" id="hudScore">0</div><div class="streak" id="hudStreak"></div></div>
+    <div class="hudBox"><div class="score h" id="hudScore">0</div><div class="timer" id="hudTime">⏱ 0:00.0</div><div class="streak" id="hudStreak"></div></div>
   </div>
   <div class="qPanel panel hidden" id="qPanel">
     <div class="qTop"><span class="tag" id="qTag">JUMP 1 / 8</span><button class="say" id="btnSay">🔊 Hear it</button></div>
@@ -431,9 +434,9 @@ const PARKS=[
  {name:'Footy Stadium',em:'🏟️',sky:0x16213f,fog:0x1d2a4d,ground:0x2f8f3a,hill:0x23304f,track:0x3fa34b,ramp:0xe63946,css:'linear-gradient(160deg,#2f8f3a,#16213f)',decor:'stadium',stadium:true,gapC:'#ffffff',key:2,bpm:128,bonus:true},
  {name:'Candy Land',em:'🍭',sky:0xbde0fe,fog:0xffd6ec,ground:0xf28dbf,hill:0xe979b4,track:0x7b4a2e,ramp:0xff5fa2,css:'linear-gradient(160deg,#ff8fc7,#9b5de5)',decor:'candy',gapC:'#5a3220',key:4,bpm:130,bonus:true},
  {name:'North Pole',em:'🎅',sky:0x24356e,fog:0x4a5f9e,ground:0xf4f8ff,hill:0xdde8f6,track:0xcfe4f7,ramp:0xc1121f,css:'linear-gradient(160deg,#c1121f,#0b6623)',decor:'xmas',xmas:true,gapC:'#a8d8ff',key:0,bpm:112},
- {name:'Dino Jungle',em:'🦕',sky:0x9ee6c9,fog:0xb9ecd3,ground:0x4f9a3e,hill:0x3e7d33,track:0xb08a5b,ramp:0x8b5a2b,css:'linear-gradient(160deg,#4caf50,#1b5e20)',decor:'dino',gapC:'#3a9ad9',key:-4,bpm:124,open:true,race:true,rt:1},
- {name:'Food Land',em:'🍔',sky:0xffe5a3,fog:0xfff0c8,ground:0xf2f2f2,hill:0xffc857,track:0xd99a5b,ramp:0xffb703,css:'linear-gradient(160deg,#ffb703,#fb5607)',decor:'food',gapC:'#e63946',key:1,bpm:130,open:true,race:true,rt:.92},
- {name:'Spooky Land',em:'🎃',sky:0x1a0f2e,fog:0x2b1a4a,ground:0x2e2a3a,hill:0x231d33,track:0x4a4458,ramp:0xff7b00,css:'linear-gradient(160deg,#6a2c91,#160b2b)',decor:'spooky',spooky:true,gapC:'#3dff7a',key:-3,bpm:104,open:true,race:true,rt:.85}
+ {name:'Dino Jungle',em:'🦕',sky:0x9ee6c9,fog:0xb9ecd3,ground:0x4f9a3e,hill:0x3e7d33,track:0xb08a5b,ramp:0x8b5a2b,css:'linear-gradient(160deg,#4caf50,#1b5e20)',decor:'dino',gapC:'#3a9ad9',key:-4,bpm:124,bonus:true,rt:1},
+ {name:'Food Land',em:'🍔',sky:0xffe5a3,fog:0xfff0c8,ground:0xf2f2f2,hill:0xffc857,track:0xd99a5b,ramp:0xffb703,css:'linear-gradient(160deg,#ffb703,#fb5607)',decor:'food',gapC:'#e63946',key:1,bpm:130,bonus:true,rt:.92},
+ {name:'Spooky Land',em:'🎃',sky:0x1a0f2e,fog:0x2b1a4a,ground:0x2e2a3a,hill:0x231d33,track:0x4a4458,ramp:0xff7b00,css:'linear-gradient(160deg,#6a2c91,#160b2b)',decor:'spooky',spooky:true,gapC:'#3dff7a',key:-3,bpm:104,bonus:true,rt:.85}
 ];
 const DIFFS={
  rookie:{name:'Rookie',em:'🌱',ds:'Counting, adding & taking away',base:0,n:3},
@@ -441,20 +444,22 @@ const DIFFS={
  legend:{name:'Legend',em:'👑',ds:'Times tables, dividing & tricky mixes',base:6,n:4}
 };
 const NQ=8;
-const XMAS=PARKS.findIndex(p=>p.xmas);let LASTP=0;PARKS.forEach((p,i)=>{if(!p.xmas&&!p.open)LASTP=i;});
-const OPEN=PARKS.map((p,i)=>p.open?i:-1).filter(i=>i>=0);
+const XMAS=PARKS.findIndex(p=>p.xmas);
+/* unlock order: the original ten, then Dino Jungle, Food Land, Spooky Land. The North Pole stays a hidden extra. */
+const CHAIN=PARKS.map((p,i)=>i).filter(i=>!PARKS[i].xmas);const LASTP=CHAIN[CHAIN.length-1];
+const nextPark=i=>{const k=CHAIN.indexOf(i);return k>=0&&k<CHAIN.length-1?CHAIN[k+1]:null;};
 const RIVAL={id:'dash',name:'Dash',skin:'#e0ac69',hair:'#111111',shirt:'#1f2937',pants:'#84cc16'};
 const SANTA={id:'santa',name:'Santa',skin:'#f6cfb0',hair:'#f4f4f4',shirt:'#c1121f',pants:'#c1121f',santa:true};
 
 /* ================= SAVE ================= */
 const NP=PARKS.length;
 const SKEY=IS_BETA?'sumShredders_beta_v2':'sumShredders_v2',OLDKEY='sumShredders_v1';
-const blankProg=()=>({stars:Array(NP).fill(0),best:Array(NP).fill(0),race:Array(NP).fill(0)});
-const newProfile=name=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e5),name,sel:{vehicle:'bike',rider:'max',helmet:0,paint:0,diff:'rookie',narrator:'dad',cam:false,camCorner:'',scare:true},prog:{rookie:blankProg(),pro:blankProg(),legend:blankProg()},cleared:Array(NP).fill(0),chicken:false,perfect:false,xmas:false,daily:{last:'',streak:0,best:0,total:0}});
+const blankProg=()=>({stars:Array(NP).fill(0),best:Array(NP).fill(0),race:Array(NP).fill(0),time:Array(NP).fill(0)});
+const newProfile=name=>({id:'p'+Date.now().toString(36)+Math.floor(Math.random()*1e5),name,sel:{vehicle:'bike',rider:'max',helmet:0,paint:0,diff:'rookie',narrator:'dad',cam:false,camCorner:'',race:true},prog:{rookie:blankProg(),pro:blankProg(),legend:blankProg()},cleared:Array(NP).fill(0),chicken:false,perfect:false,xmas:false,daily:{last:'',streak:0,best:0,total:0}});
 function fixProfile(p){
  const d=newProfile(String(p.name||'Rider').slice(0,12));d.id=p.id||d.id;
  d.sel=Object.assign(d.sel,p.sel||{});d.chicken=!!p.chicken;
- for(const k of['rookie','pro','legend']){const pr=(p.prog&&p.prog[k])||{};d.prog[k].stars=d.prog[k].stars.map((v,i)=>+((pr.stars||[])[i]||0));d.prog[k].best=d.prog[k].best.map((v,i)=>+((pr.best||[])[i]||0));d.prog[k].race=d.prog[k].race.map((v,i)=>+((pr.race||[])[i]||0));}
+ for(const k of['rookie','pro','legend']){const pr=(p.prog&&p.prog[k])||{};d.prog[k].stars=d.prog[k].stars.map((v,i)=>+((pr.stars||[])[i]||0));d.prog[k].best=d.prog[k].best.map((v,i)=>+((pr.best||[])[i]||0));d.prog[k].race=d.prog[k].race.map((v,i)=>+((pr.race||[])[i]||0));d.prog[k].time=d.prog[k].time.map((v,i)=>+((pr.time||[])[i]||0));}
  d.cleared=d.cleared.map((v,i)=>(p.cleared||[])[i]?1:0);d.perfect=!!p.perfect;d.xmas=!!p.xmas;if(p.daily)d.daily={last:String(p.daily.last||''),streak:+p.daily.streak||0,best:+p.daily.best||0,total:+p.daily.total||0};
  if(d.sel.vehicle==='chicken'&&!d.chicken)d.sel.vehicle='bike';
  return d;
@@ -468,6 +473,7 @@ try{
 const SET=DB.settings;
 let S=DB.profiles.find(p=>p.id===DB.cur)||newProfile('Guest');
 function save(){try{localStorage.setItem(SKEY,JSON.stringify(DB));}catch(e){}}
+const fmtT=t=>{t=Math.max(0,t);const m=Math.floor(t/60),s2=t-m*60;return m+':'+(s2<10?'0':'')+s2.toFixed(1);};
 const esc=t=>String(t).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const parksCleared=()=>S.cleared.filter(Boolean).length;
 const itemUnlocked=it=>it.d?S.daily.best>=it.d:(it.u<0||!!S.cleared[it.u]);
@@ -508,7 +514,7 @@ const GEN=[
   const a=ri(2,6),b=ri(2,6),c=ri(2,5);return {text:`(${a} + ${b}) × ${c} = ?`,speak:`What is ${a} plus ${b}, then times ${c}?`,answer:(a+b)*c,eq:`(${a} + ${b}) × ${c} = ${(a+b)*c}`,sayEq:`${a} plus ${b} is ${a+b}, times ${c} is ${(a+b)*c}`,near:[a+b*c,(a+b)*c+c,(a+b)*c-c]};}
 ];
 const CAP={rookie:5,pro:10,legend:13}; /* rookie stops before GEN[6] (times tables) */
-function tierFor(diff,park,q){const cap=Math.min(GEN.length-1,CAP[diff]);if(PARKS[park].open)return Math.min(cap,DIFFS[diff].base+1+(q>=3?1:0)+(q>=6?1:0));if(park>=5)return q>=5?cap:Math.max(0,cap-ri(0,2));return Math.min(cap,DIFFS[diff].base+park+(q>=5?1:0));}
+function tierFor(diff,park,q){const cap=Math.min(GEN.length-1,CAP[diff]);if(park>=5)return q>=5?cap:Math.max(0,cap-ri(0,2));return Math.min(cap,DIFFS[diff].base+park+(q>=5?1:0));}
 function makeChoices(q,n){
  const ans=q.answer,set=new Set([ans]),big=ans>=20;
  const cands=shuffle([...(q.near||[]),...(big?[ans+10,ans-10]:[]),ans+1,ans-1,ans+2,ans-2]).concat([ans+3,ans-3,ans+4,ans+5,ans+6]);
@@ -1553,14 +1559,14 @@ function renderSetup(){
  const sw=(arr,key)=>arr.map((h,i)=>{const lk=!itemUnlocked(h);return `<div class="swatch ${S.sel[key]===i?'sel':''} ${lk?'locked':''}" data-${key}="${i}" style="background:${h.c}" title="${lk?(h.d?h.n:PARKS[h.u].bonus?'Keep riding to unlock…':'Finish '+PARKS[h.u].name+' to unlock'):''}"></div>`;}).join('');
  $('#helmetRow').innerHTML=sw(HELMETS,'helmet');$('#paintRow').innerHTML=sw(PAINTS,'paint');
  $('#narrRow').innerHTML=[['dad','👨','Dad',VO.ready?'Dad\'s real voice!':'No recordings yet'],['robot','🤖','Robot','Computer voice']].map(([k,em,nm,ds])=>`<div class="card ${narr()===k?'sel':''} ${k==='dad'&&!VO.ready?'locked':''}" data-narr="${k}"><div class="em">${em}</div><div><div class="nm">${nm}</div><div class="ds">${ds}</div></div></div>`).join('');
- $('#scareRow').innerHTML=[[true,'😱','Scares on','A monster jumps out!'],[false,'🙈','Scares off','No jump scare']].map(([k,em,nm,ds])=>`<div class="card ${S.sel.scare===k?'sel':''}" data-scare="${k?1:0}"><div class="em">${em}</div><div><div class="nm">${nm}</div><div class="ds">${ds}</div></div></div>`).join('');
+ $('#raceRow').innerHTML=[[true,'🏁','Race Dash','Beat him to the finish!'],[false,'🚲','Ride solo','No race, take your time']].map(([k,em,nm,ds])=>`<div class="card ${(S.sel.race!==false)===k?'sel':''}" data-race="${k?1:0}"><div class="em">${em}</div><div><div class="nm">${nm}</div><div class="ds">${ds}</div></div></div>`).join('');
  $('#diffRow').innerHTML=Object.entries(DIFFS).map(([k,d])=>`<div class="card ${S.sel.diff===k?'sel':''}" data-diff="${k}"><div class="em">${d.em}</div><div><div class="nm">${d.name}</div><div class="ds">${d.ds}</div></div></div>`).join('');
 }
 $('#sSetup').addEventListener('click',e=>{
- const t=e.target.closest('[data-veh],[data-rider],[data-helmet],[data-paint],[data-diff],[data-mystery],[data-narr],[data-scare]');if(!t)return;
+ const t=e.target.closest('[data-veh],[data-rider],[data-helmet],[data-paint],[data-diff],[data-mystery],[data-narr],[data-race]');if(!t)return;
  if(t.classList.contains('locked')){sfx('wrong');if(t.dataset.mystery)shout('🤫 Find the secret code!','trick');return;}
  sfx('click');const ds=t.dataset;
- if(ds.veh)S.sel.vehicle=ds.veh;if(ds.rider)S.sel.rider=ds.rider;if(ds.helmet!=null)S.sel.helmet=+ds.helmet;if(ds.paint!=null)S.sel.paint=+ds.paint;if(ds.diff)S.sel.diff=ds.diff;if(ds.narr){S.sel.narrator=ds.narr;save();renderSetup();greet(S.name);return;}if(ds.scare!=null){S.sel.scare=ds.scare==='1';save();renderSetup();return;}
+ if(ds.veh)S.sel.vehicle=ds.veh;if(ds.rider)S.sel.rider=ds.rider;if(ds.helmet!=null)S.sel.helmet=+ds.helmet;if(ds.paint!=null)S.sel.paint=+ds.paint;if(ds.diff)S.sel.diff=ds.diff;if(ds.narr){S.sel.narrator=ds.narr;save();renderSetup();greet(S.name);return;}if(ds.race!=null){S.sel.race=ds.race==='1';save();renderSetup();if(S.sel.race)shout('🏁 RACE DASH!');return;}
  save();renderSetup();if(!ds.diff)respawnPreview();
 });
 
@@ -1623,9 +1629,9 @@ $('#btnSwitch').onclick=()=>{sfx('click');setMode('players');};
 const dayKey=(d=new Date())=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 const yesterdayKey=()=>{const d=new Date();d.setDate(d.getDate()-1);return dayKey(d);};
 function dailyToday(){const k=dayKey();let h=2166136261;for(const c of k)h=Math.imul(h^c.charCodeAt(0),16777619)>>>0;
- const park=OPEN[h%OPEN.length],goal=['race','perfect','streak'][(h>>>8)%3],nm=PARKS[park].name;
+ const opts=CHAIN.filter(parkUnlocked),park=opts[h%opts.length],goals=S.sel.race!==false?['race','perfect','streak']:['perfect','streak'],goal=goals[(h>>>8)%goals.length],nm=PARKS[park].name;
  const text={race:`Beat Dash in ${nm}!`,perfect:`Finish ${nm} with no mistakes!`,streak:`Get 5 in a row in ${nm}!`}[goal];
- return{key:k,park,goal,text};}
+ return{key:k,park,goal,text,diff:S.sel.diff};}
 const dailyDone=()=>S.daily.last===dayKey();
 const dailyStreak=()=>(S.daily.last===dayKey()||S.daily.last===yesterdayKey())?S.daily.streak:0;
 function renderDaily(){const c=dailyToday(),d=dailyDone(),st=dailyStreak(),P=PARKS[c.park];
@@ -1634,16 +1640,16 @@ function renderDaily(){const c=dailyToday(),d=dailyDone(),st=dailyStreak(),P=PAR
 $('#dailyBox').addEventListener('click',()=>{const pk=$('#dailyBox').dataset.park;if(pk==='')return;sfx('click');startLevel(+pk);});
 
 /* ---------- map ---------- */
-function parkUnlocked(i){if(PARKS[i].open)return true;if(PARKS[i].xmas)return !!S.xmas;return i===0||S.prog[S.sel.diff].stars[i-1]>0;}
+function parkUnlocked(i){if(PARKS[i].xmas)return !!S.xmas;const k=CHAIN.indexOf(i);return k===0||S.prog[S.sel.diff].stars[CHAIN[k-1]]>0;}
 function renderMap(){
  const pr=S.prog[S.sel.diff],d=DIFFS[S.sel.diff];
  $('#mapDiff').textContent=`👤 ${S.name} · ${d.em} ${d.name}`;
  const vis=i=>(!PARKS[i].bonus&&!PARKS[i].xmas)||parkUnlocked(i);
  renderDaily();
- const order=[...OPEN,...PARKS.map((p,i)=>i).filter(i=>!PARKS[i].open)];
+ const order=[...CHAIN,XMAS];
  $('#parkList').innerHTML=order.map(i=>{const p=PARKS[i],lk=!parkUnlocked(i),st=pr.stars[i];if(!vis(i))return '';
-  return `<div class="park ${lk?'locked':''}" data-park="${i}" style="background:${p.css}">${p.bonus?'<div class="ribbon">BONUS</div>':p.xmas?'<div class="ribbon xmas">XMAS</div>':p.open?'<div class="ribbon race">NEW</div>':''}<div class="num">${p.xmas?'SECRET':p.open?(pr.race[i]?'🏁 BEAT DASH':'RACE DASH'):'PARK '+(i+1)}</div><div class="em">${p.em}</div><div class="nm">${p.name}</div>
-  <div class="st">${[0,1,2].map(k=>k<st?'⭐':'<span style="opacity:.35;filter:grayscale(1)">⭐</span>').join('')}</div><div class="bs">${pr.best[i]?'Best '+pr.best[i].toLocaleString():(lk?'Locked':'Not ridden yet')}</div></div>`;}).join('');
+  return `<div class="park ${lk?'locked':''}" data-park="${i}" style="background:${p.css}">${p.bonus?'<div class="ribbon">BONUS</div>':p.xmas?'<div class="ribbon xmas">XMAS</div>':''}<div class="num">${p.xmas?'SECRET':'PARK '+(CHAIN.indexOf(i)+1)}${pr.race[i]?' · 🏁':''}</div><div class="em">${p.em}</div><div class="nm">${p.name}</div>
+  <div class="st">${[0,1,2].map(k=>k<st?'⭐':'<span style="opacity:.35;filter:grayscale(1)">⭐</span>').join('')}</div><div class="bs">${pr.best[i]?'Best '+pr.best[i].toLocaleString():(lk?'Locked':'Not ridden yet')}</div>${pr.time[i]?`<div class="parkTime">⏱ ${fmtT(pr.time[i])}</div>`:''}</div>`;}).join('');
  const tot=pr.stars.reduce((a,b)=>a+b,0),bs=pr.best.reduce((a,b)=>a+b,0);
  $('#mapFoot').textContent=`⭐ ${tot} / ${PARKS.filter((p,i)=>vis(i)).length*3} stars on ${d.name}   •   🏆 Total best score ${bs.toLocaleString()}`;
 }
@@ -1652,9 +1658,9 @@ $('#parkList').addEventListener('click',e=>{const t=e.target.closest('[data-park
 /* ---------- level flow ---------- */
 function startLevel(i){
  clearTimers();hush();G.paused=false;
- G.accept=false;G.cur=null;G.park=i;G.diff=S.sel.diff;G.q=0;G.lives=3;G.wrong=0;G.score=0;G.streak=0;G.maxS=0;G.beatRival=false;G.scared=false;G.scareAt=3+Math.floor(Math.random()*3);G.used=new Set();
+ G.accept=false;G.cur=null;G.park=i;G.diff=S.sel.diff;G.q=0;G.lives=3;G.wrong=0;G.score=0;G.streak=0;G.maxS=0;G.beatRival=false;G.scared=false;G.time=0;G.timing=false;G.scareAt=3+Math.floor(Math.random()*3);G.used=new Set();
  {const c=dailyToday();G.daily=(!dailyDone()&&c.park===i)?c:null;}
- removeRival();buildWorld(i);spawnRider();R.z=R.prevZ=8;if(PARKS[i].race)spawnRival();
+ removeRival();buildWorld(i);spawnRider();R.z=R.prevZ=8;if(S.sel.race!==false&&!PARKS[i].xmas)spawnRival();
  mus.key=PARKS[i].key;mus.bpm=PARKS[i].bpm;mus.xmas=!!PARKS[i].xmas;mus.minor=!!PARKS[i].spooky;mus.step=0;
  setMode('play');cam.tSide=2.6;cam.tUp=3.2;cam.tBack=8;cam.snap=true;
  $('#qPanel').classList.add('hidden');renderHud();
@@ -1662,7 +1668,7 @@ function startLevel(i){
  const cnt=$('#countText');show('#sCount',1);
  const steps=['3','2','1','GO!'];
  steps.forEach((s,k)=>later(()=>{cnt.textContent=s;cnt.style.animation='none';void cnt.offsetWidth;cnt.style.animation='';sfx('beep',s==='GO!');dadOnly([s==='GO!'?'e_go':'n'+s]);},k*700));
- later(()=>{show('#sCount',0);if(PARKS[i].xmas){speak(['park'+i,'e_hohoho'],'North Pole! Ho ho ho!');shout('🎅 HO HO HO!');sfx('jingle');}else if(PARKS[i].race){speak(['park'+i,'e_racedash'],`${PARKS[i].name}! Race Dash to the finish!`);shout('🏁 RACE DASH!');if(RV)RV.active=true;}else speak(['park'+i,PARKS[i].space?'e_lowgravity':'e_letsride'],PARKS[i].space?'Moon Base! Low gravity!':`${PARKS[i].name}! Let's ride!`);if(PARKS[i].space)shout('LOW GRAVITY!');
+ later(()=>{show('#sCount',0);G.timing=true;if(PARKS[i].xmas){speak(['park'+i,'e_hohoho'],'North Pole! Ho ho ho!');shout('🎅 HO HO HO!');sfx('jingle');}else if(RV){speak(['park'+i,'e_racedash'],`${PARKS[i].name}! Race Dash to the finish!`);shout(PARKS[i].space?'🏁 RACE DASH! LOW GRAVITY!':'🏁 RACE DASH!');RV.active=true;}else speak(['park'+i,PARKS[i].space?'e_lowgravity':'e_letsride'],PARKS[i].space?'Moon Base! Low gravity!':`${PARKS[i].name}! Let's ride!`);if(PARKS[i].space&&!RV)shout('LOW GRAVITY!');
   const z0=R.z,z1=approachZ(0);runSeq([{dur:2.2,start:()=>sfx('roll'),update:u=>{R.z=lerp(z0,z1,easeIO(u));}}],askQuestion);},4*700);
 }
 function renderHud(){
@@ -1671,6 +1677,7 @@ function renderHud(){
  $('#hudDots').innerHTML=Array.from({length:NQ},(_,k)=>`<span class="dot ${k<G.q?'done':k===G.q?'now':''} ${k===NQ-1?'fin':''}"></span>`).join('');
  $('#hudHearts').innerHTML=[0,1,2].map(k=>`<span class="${k>=G.lives?'lost':''}">❤️</span>`).join('');
  $('#hudScore').textContent=G.score.toLocaleString();
+ $('#hudTime').textContent='⏱ '+fmtT(G.time||0);
  $('#hudStreak').textContent=G.streak>=2?`🔥 ${G.streak} in a row! x${mult().toFixed(1).replace('.0','')}`:'';
 }
 const mult=()=>1+Math.min(G.streak,6)*.5;
@@ -1731,7 +1738,7 @@ function doJump(){
     if(G.streak>=2){const S_=['','','NICE!','SICK!','RADICAL!','UNSTOPPABLE!','LEGENDARY!'];shout(S_[Math.min(G.streak,6)]);dadOnly(['c_'+S_[Math.min(G.streak,6)].toLowerCase().replace('!','')]);}
     G.q++;renderHud();if(fin){cam.mode='finish';}}},
   {dur:fin?2.4:1.3,update:u=>{R.z=lerp(zLand,zNext,easeOut(u));if(fin)R.cheer=clamp(u*2,0,1);}}
- ],()=>{if(fin)levelComplete();else if(PARKS[G.park].spooky&&S.sel.scare!==false&&!G.scared&&G.q===G.scareAt){G.scared=true;jumpScare(askQuestion);}else askQuestion();});
+ ],()=>{if(fin)levelComplete();else if(PARKS[G.park].spooky&&!G.scared&&G.q===G.scareAt){G.scared=true;jumpScare(askQuestion);}else askQuestion();});
 }
 function doWrong(){
  const zA=R.z,zB=zA-4.5;$('#qPanel').classList.add('hidden');
@@ -1753,14 +1760,17 @@ function doCrash(){
   show('#sCrash',1);$('#btnPause').classList.add('hide');
  });
 }
+function xm0(){return !!PARKS[G.park].xmas;}
 function levelComplete(){
+ G.timing=false;
  hush();sfx('fanfare');confetti();
  const raced=!!RV;if(RV){G.beatRival=!RV.finished;RV.active=false;if(!G.beatRival)RV.cheer=1;}
  const stars=Math.max(1,3-G.wrong),bonus=500+G.lives*200+(G.beatRival?500:0);G.score+=bonus;renderHud();
- const nextWas=G.park+1<NP&&(PARKS[G.park+1].xmas||parkUnlocked(G.park+1));
+ const NXT=xm0()?null:nextPark(G.park),nextWas=NXT==null||parkUnlocked(NXT);
  const pr=S.prog[G.diff];const newBest=G.score>pr.best[G.park];
  pr.stars[G.park]=Math.max(pr.stars[G.park],stars);pr.best[G.park]=Math.max(pr.best[G.park],G.score);
  const firstClear=!S.cleared[G.park],before=parksCleared();S.cleared[G.park]=1;save();
+ const prevT=pr.time[G.park],newRec=!prevT||G.time<prevT;if(newRec){pr.time[G.park]=+G.time.toFixed(1);save();}
  const unl=[];if(raced){if(G.beatRival){pr.race[G.park]=1;save();unl.unshift('🏁 YOU BEAT DASH! +500');}else unl.unshift('😜 Dash won this time. Answer quicker to beat him!');}
  if(G.wrong===0&&!S.perfect){S.perfect=true;save();unl.push('🏉 SECRET RIDERS: Patrick & Jeremy!');}
  if(firstClear){HELMETS.concat(PAINTS).forEach(h=>{if(h.u===G.park)unl.push(h.n);});RIDERS.forEach(r=>{if(r.unlock&&before<r.unlock&&parksCleared()>=r.unlock)unl.push('Secret rider: '+r.name);});}
@@ -1769,13 +1779,13 @@ function levelComplete(){
   if(ok){const b0=S.daily.best;S.daily.streak=S.daily.last===yesterdayKey()?S.daily.streak+1:1;S.daily.last=dayKey();S.daily.total++;S.daily.best=Math.max(S.daily.best,S.daily.streak);save();dailyNow=true;
    unl.unshift(`📅 DAILY CHALLENGE DONE! 🔥 ${S.daily.streak}-day streak`);later(()=>dadOnly(['e_daily']),3600);HELMETS.concat(PAINTS).forEach(h=>{if(h.d&&b0<h.d&&S.daily.best>=h.d)unl.push(h.n);});}
   else unl.push(`📅 Daily challenge not done yet: ${G.daily.text} Try again!`);}
- if(!nextWas&&G.park+1<NP&&PARKS[G.park+1].bonus&&!PARKS[G.park+1].xmas)unl.unshift(`${PARKS[G.park+1].em} BONUS PARK: ${PARKS[G.park+1].name}!`);
+ if(!nextWas&&NXT!=null&&PARKS[NXT].bonus)unl.unshift(`${PARKS[NXT].em} BONUS PARK: ${PARKS[NXT].name}!`);
  later(()=>{
-  const xm=!!PARKS[G.park].xmas,op=!!PARKS[G.park].open,nextOpen=OPEN[OPEN.indexOf(G.park)+1],last=xm||G.park===LASTP||(op&&nextOpen==null);
+  const xm=!!PARKS[G.park].xmas,last=xm||G.park===LASTP;
   $('#winTitle').textContent=xm?'🎄 MERRY CHRISTMAS! 🎄':G.park===LASTP?'🏆 CHAMPION! 🏆':'PARK COMPLETE!';
   $('#winStars').innerHTML=[0,1,2].map(k=>`<span class="${k<stars?'':'off'}" style="animation-delay:${.2+k*.25}s">⭐</span>`).join('');
   $('#winScore').textContent=`${G.score.toLocaleString()} points`;
-  $('#winSub').textContent=`Finish bonus +${bonus}${newBest?'  •  NEW BEST! 🎉':''}`;
+  $('#winSub').innerHTML=`Finish bonus +${bonus}${newBest?'  •  NEW BEST! 🎉':''}<div class="winTime">⏱ ${fmtT(G.time)}${newRec?(prevT?'  •  NEW RECORD! 🚀':'  •  First time set!'):'  •  Best '+fmtT(prevT)}</div>`;
   $('#winUnlocks').innerHTML=unl.length?`<div class="unl">🎁 NEW UNLOCK${unl.length>1?'S':''}!<br>${unl.join('<br>')}</div>`:'';
   $('#btnWinNext').style.display=last?'none':'';
   show('#sWin',1);$('#btnPause').classList.add('hide');
@@ -1800,7 +1810,7 @@ $('#btnRestart').onclick=()=>{sfx('click');show('#sPause',0);startLevel(G.park);
 $('#btnQuit').onclick=()=>{sfx('click');toMap();};
 $('#btnWinMap').onclick=()=>{sfx('click');toMap();};
 $('#btnWinReplay').onclick=()=>{sfx('click');startLevel(G.park);};
-$('#btnWinNext').onclick=()=>{sfx('click');if(PARKS[G.park].open){const n=OPEN[OPEN.indexOf(G.park)+1];if(n!=null)startLevel(n);}else if(G.park<LASTP)startLevel(G.park+1);};
+$('#btnWinNext').onclick=()=>{sfx('click');const n=nextPark(G.park);if(n!=null&&!PARKS[G.park].xmas)startLevel(n);};
 $('#btnCrashRetry').onclick=()=>{sfx('click');startLevel(G.park);};
 $('#btnCrashMap').onclick=()=>{sfx('click');toMap();};
 function resetMenuWorld(){removeRival();G.accept=false;G.cur=null;clearTimers();hush();G.paused=false;if(parkIdx!==0)buildWorld(0);spawnRider();R.z=R.prevZ=6;mus.key=0;mus.bpm=110;mus.xmas=false;mus.minor=false;}
@@ -1839,7 +1849,8 @@ buildWorld(0);spawnRider();R.z=R.prevZ=6;setMode('title');
 let last=performance.now();
 function frame(now){
  const dt=Math.min(.05,(now-last)/1000);last=now;
- if(!G.paused){clock+=dt;updateSeq(dt);if(R&&G.mode!=='play')R.spinY+=dt*.6;updateRider(dt);updateRival(dt);updateCrash(dt);updateFx(dt);updateWorld(dt);}
+ if(!G.paused){clock+=dt;updateSeq(dt);if(R&&G.mode!=='play')R.spinY+=dt*.6;if(G.timing&&G.mode==='play'&&R&&!R.crashed){G.time+=dt;if(Math.floor(G.time*10)!==G.tshow){G.tshow=Math.floor(G.time*10);$('#hudTime').textContent='⏱ '+fmtT(G.time);}}
+  updateRider(dt);updateRival(dt);updateCrash(dt);updateFx(dt);updateWorld(dt);}
  updateCamera(dt);renderer.render(scene,camera);
  requestAnimationFrame(frame);
 }
